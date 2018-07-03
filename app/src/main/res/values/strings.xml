@@ -44,4 +44,9 @@
     <string name="facebook_application_id" translatable="false">795035227370258</string>
     <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb795035227370258</string>
     <string name="connect_first">Veuillez vous connecter</string>
+    <string name="your_lunch">YOUR LUNCH</string>
+    <string name="settings">SETTINGS</string>
+    <string name="logout">LOGOUT</string>
+    <string name="go4lunch">Go4Lunch</string>
+    <string name="email_address">E-mail address</string>
 </resources>

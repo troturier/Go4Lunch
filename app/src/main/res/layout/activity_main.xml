@@ -1,127 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_activity_linear_layout"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:fitsSystemWindows="true">
 
-    <!-- USER DATA CONTAINER -->
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_large_margin"
-            android:layout_weight="0.1"
-            android:gravity="center">
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/main_activity_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
 
-            <!--FIREBASE_IMAGE -->
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.1"
-                app:srcCompat="@drawable/ic_logo_auth" />
-
-            <!-- PROGRESS BAR -->
-            <ProgressBar
-                android:id="@+id/profile_activity_progress_bar"
-                android:layout_width="30dip"
-                android:layout_height="30dip"
-                android:layout_margin="@dimen/default_large_margin"
-                android:visibility="invisible" />
-
-            <!-- PROFILE IMAGE -->
-            <ImageView
-                android:id="@+id/profile_activity_imageview_profile"
+            <!-- BUTTONS CONTAINER -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.1"
-                app:srcCompat="@drawable/ic_anon_user_48dp" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <!-- BUTTON DELETE ACCOUNT -->
+                <Button
+                    android:id="@+id/profile_activity_button_delete"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_margin"
+                    android:background="@drawable/button_radius_error_color"
+                    android:padding="@dimen/default_margin"
+                    android:text="@string/button_delete_account"
+                    android:textColor="#fff"
+                    android:textSize="@dimen/default_text_size" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
+    </FrameLayout>
 
-        <!-- PROFILE USERNAME -->
-        <TextView
-            android:id="@+id/profile_activity_text_view_username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
-            android:text="@string/text_input_username"
-            android:textColor="@android:color/white"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <!-- PROFILE EMAIL CONTAINER -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="@dimen/default_margin">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/text_view_email"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/default_text_size"
-                android:textStyle="bold" />
-
-            <!-- PROFILE EMAIL -->
-            <TextView
-                android:id="@+id/profile_activity_text_view_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/default_margin"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/default_text_size" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <!-- BUTTONS CONTAINER -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/drawer_view"
+        app:headerLayout="@layout/nav_header"
+        android:background="@color/colorDrawer"
+        app:itemTextColor="@android:color/white"
+        app:itemIconTint="@android:color/white"
+        />
 
-        <!-- BUTTON SIGN OUT -->
-        <Button
-            android:id="@+id/profile_activity_button_sign_out"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
-            android:background="@drawable/button_radius_accent_color"
-            android:padding="@dimen/default_margin"
-            android:text="@string/button_sign_out_account"
-            android:textColor="#fff"
-            android:textSize="@dimen/default_text_size" />
-
-        <!-- BUTTON DELETE ACCOUNT -->
-        <Button
-            android:id="@+id/profile_activity_button_delete"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
-            android:background="@drawable/button_radius_error_color"
-            android:padding="@dimen/default_margin"
-            android:text="@string/button_delete_account"
-            android:textColor="#fff"
-            android:textSize="@dimen/default_text_size" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</android.support.v4.widget.DrawerLayout>

@@ -3,14 +3,20 @@ package com.openclassrooms.go4lunch;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +29,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.openclassrooms.go4lunch.api.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
 
@@ -39,20 +44,19 @@ public class MainActivity extends AppCompatActivity {
     //FOR DESIGN
     @BindView(R.id.main_activity_linear_layout)
     LinearLayout linearLayout;
-    @BindView(R.id.profile_activity_imageview_profile)
-    ImageView imageViewProfile;
-    @BindView(R.id.profile_activity_text_view_username)
-    TextView textViewUsername;
-    @BindView(R.id.profile_activity_text_view_email)
-    TextView textViewEmail;
-    @BindView(R.id.profile_activity_progress_bar)
-    ProgressBar progressBar;
+
+    ImageView drawerImageviewProfile;
+    TextView drawerEmail;
+    TextView drawerUsername;
 
     //FOR DATA
     private static final int RC_SIGN_IN = 123;
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
+    private FirebaseAuth mAuth;
     private User currentUser;
+
+    private DrawerLayout mDrawerLayout;
 
     // --------------------
     // LIFE CYCLE
@@ -64,17 +68,38 @@ public class MainActivity extends AppCompatActivity {
         this.setContentView(R.layout.activity_main);
         ButterKnife.bind(this); //Configure Butterknife
 
+        AuthUI.getInstance();
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                menuItem -> {
+
+                    int id = menuItem.getItemId();
+
+                    switch (id){
+                        case R.id.nav_logout :
+                            signOutUserFromFirebase();
+                            break;
+                        case R.id.nav_lunch:
+                            break;
+                        case R.id.nav_settings:
+                            break;
+                        default:
+                            break;
+                    }
+
+                    mDrawerLayout.closeDrawers();
+                    return true;
+                });
+
         if(!isCurrentUserLogged()){
             startSignInActivity();
         }
         else{
-            startSignInActivity();
-            UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    currentUser = documentSnapshot.toObject(User.class);
-                }
-            });
+            // startSignInActivity();
+            UserHelper.getUser(Objects.requireNonNull(this.getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> currentUser = documentSnapshot.toObject(User.class));
             this.configureToolbar();
             this.updateUIWhenCreating();
         }
@@ -84,9 +109,6 @@ public class MainActivity extends AppCompatActivity {
     // ACTIONS
     // --------------------
 
-    @OnClick(R.id.profile_activity_button_sign_out)
-    public void onClickSignOutButton() { this.signOutUserFromFirebase(); }
-
     @OnClick(R.id.profile_activity_button_delete)
     public void onClickDeleteButton() {
         new AlertDialog.Builder(this)
@@ -94,6 +116,16 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.popup_message_choice_yes, (dialogInterface, i) -> deleteUserFromFirebase())
                 .setNegativeButton(R.string.popup_message_choice_no, null)
                 .show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // --------------------
@@ -142,28 +174,32 @@ public class MainActivity extends AppCompatActivity {
     private void updateUIWhenCreating(){
         if (this.getCurrentUser() != null){
 
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            View headerView = navigationView.getHeaderView(0);
+
+            drawerImageviewProfile = headerView.findViewById(R.id.drawer_imageview_profile);
+            drawerEmail = headerView.findViewById(R.id.drawer_email);
+            drawerUsername = headerView.findViewById(R.id.drawer_username);
+
             //Get picture URL from Firebase
             if (this.getCurrentUser().getPhotoUrl() != null) {
                 Glide.with(this)
                         .load(this.getCurrentUser().getPhotoUrl())
                         .apply(RequestOptions.circleCropTransform())
-                        .into(imageViewProfile);
+                        .into(drawerImageviewProfile);
             }
 
             //Get email & username from Firebase
             String email = TextUtils.isEmpty(this.getCurrentUser().getEmail()) ? getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
 
             //Update views with data
-            this.textViewEmail.setText(email);
+            this.drawerEmail.setText(email);
 
             // 5 - Get additional data from Firestore
-            UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    currentUser = documentSnapshot.toObject(User.class);
-                    String username = TextUtils.isEmpty(currentUser.getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
-                    textViewUsername.setText(username);
-                }
+            UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(documentSnapshot -> {
+                currentUser = documentSnapshot.toObject(User.class);
+                String username = TextUtils.isEmpty(currentUser.getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
+                drawerUsername.setText(username);
             });
         }
     }
@@ -188,8 +224,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void configureToolbar(){
-        ActionBar ab = getSupportActionBar();
-        Objects.requireNonNull(ab).hide();
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitleTextColor(android.graphics.Color.WHITE);
+
+        ActionBar actionbar = getSupportActionBar();
+        assert actionbar != null;
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setTitle("I'm Hungry !");
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
     }
 
     // --------------------
@@ -197,7 +240,8 @@ public class MainActivity extends AppCompatActivity {
     // --------------------
 
     protected OnFailureListener onFailureListener(){
-        return e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
+        // return e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
+        return e -> Log.d("Failure", "Problème de suppression", e);
     }
 
     // --------------------
