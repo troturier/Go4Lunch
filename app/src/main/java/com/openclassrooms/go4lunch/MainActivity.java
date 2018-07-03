@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             startSignInActivity();
         }
         else{
+            startSignInActivity();
             UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
