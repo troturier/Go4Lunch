@@ -3,10 +3,13 @@ package com.openclassrooms.go4lunch;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,9 +17,15 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.openclassrooms.go4lunch.api.UserHelper;
+import com.openclassrooms.go4lunch.models.User;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -28,6 +37,8 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
 
     //FOR DESIGN
+    @BindView(R.id.main_activity_linear_layout)
+    LinearLayout linearLayout;
     @BindView(R.id.profile_activity_imageview_profile)
     ImageView imageViewProfile;
     @BindView(R.id.profile_activity_text_view_username)
@@ -41,8 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 123;
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
-    private FirebaseAuth auth;
-    private FirebaseUser firebaseUser;
+    private User currentUser;
 
     // --------------------
     // LIFE CYCLE
@@ -54,13 +64,16 @@ public class MainActivity extends AppCompatActivity {
         this.setContentView(R.layout.activity_main);
         ButterKnife.bind(this); //Configure Butterknife
 
-        auth = FirebaseAuth.getInstance();
-
         if(!isCurrentUserLogged()){
             startSignInActivity();
         }
         else{
-            firebaseUser = auth.getCurrentUser();
+            UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    currentUser = documentSnapshot.toObject(User.class);
+                }
+            });
             this.configureToolbar();
             this.updateUIWhenCreating();
         }
@@ -95,7 +108,8 @@ public class MainActivity extends AppCompatActivity {
     private void deleteUserFromFirebase(){
         if (this.getCurrentUser() != null) {
 
-            this.firebaseUser.delete();
+            //4 - We also delete user from firestore storage
+            UserHelper.deleteUser(this.currentUser.getUid()).addOnFailureListener(this.onFailureListener());
 
             AuthUI.getInstance()
                     .delete(this)
@@ -103,28 +117,53 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void createUserInFirestore(){
+
+        if (this.getCurrentUser() != null){
+
+            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
+            String username = this.getCurrentUser().getDisplayName();
+            String uid = this.getCurrentUser().getUid();
+
+            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+        }
+    }
+
     // --------------------
     // UI
     // --------------------
 
-    private void configureToolbar(){
-        ActionBar ab = getSupportActionBar();
-        Objects.requireNonNull(ab).hide();
+    private void showSnackBar(LinearLayout linearLayout, String message){
+        Snackbar snackbar = Snackbar.make(linearLayout, message, Snackbar.LENGTH_SHORT);
+        snackbar.show();
     }
 
     private void updateUIWhenCreating(){
-        firebaseUser = auth.getCurrentUser();
-
         if (this.getCurrentUser() != null){
 
-            Glide.with(this)
-                        .load(this.firebaseUser.getPhotoUrl())
+            //Get picture URL from Firebase
+            if (this.getCurrentUser().getPhotoUrl() != null) {
+                Glide.with(this)
+                        .load(this.getCurrentUser().getPhotoUrl())
                         .apply(RequestOptions.circleCropTransform())
                         .into(imageViewProfile);
+            }
+
+            //Get email & username from Firebase
+            String email = TextUtils.isEmpty(this.getCurrentUser().getEmail()) ? getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
 
             //Update views with data
-            this.textViewEmail.setText(this.firebaseUser.getEmail());
-            this.textViewUsername.setText(this.firebaseUser.getDisplayName());
+            this.textViewEmail.setText(email);
+
+            // 5 - Get additional data from Firestore
+            UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    currentUser = documentSnapshot.toObject(User.class);
+                    String username = TextUtils.isEmpty(currentUser.getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
+                    textViewUsername.setText(username);
+                }
+            });
         }
     }
 
@@ -147,6 +186,19 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    protected void configureToolbar(){
+        ActionBar ab = getSupportActionBar();
+        Objects.requireNonNull(ab).hide();
+    }
+
+    // --------------------
+    // ERROR HANDLER
+    // --------------------
+
+    protected OnFailureListener onFailureListener(){
+        return e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
+    }
+
     // --------------------
     // ON RESULT HANDLER
     // --------------------
@@ -160,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), R.string.connect_first, Toast.LENGTH_LONG).show();
                 break;
             case RESULT_OK:
+                this.handleResponseAfterSignIn(requestCode, resultCode, data);
                 this.configureToolbar();
                 this.updateUIWhenCreating();
                 break;
@@ -190,8 +243,28 @@ public class MainActivity extends AppCompatActivity {
     // UTILS
     // --------------------
 
-    @Nullable
-    private FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
+    private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
 
-    private Boolean isCurrentUserLogged(){ return (this.getCurrentUser() != null); }
+        IdpResponse response = IdpResponse.fromResultIntent(data);
+
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) { // SUCCESS
+                this.createUserInFirestore();
+                showSnackBar(this.linearLayout, getString(R.string.connection_succeed));
+            } else { // ERRORS
+                if (response == null) {
+                    showSnackBar(this.linearLayout, getString(R.string.error_authentication_canceled));
+                } else if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    showSnackBar(this.linearLayout, getString(R.string.error_no_internet));
+                } else if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                    showSnackBar(this.linearLayout, getString(R.string.error_unknown_error));
+                }
+            }
+        }
+    }
+
+    @Nullable
+    protected FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
+
+    protected Boolean isCurrentUserLogged(){ return (this.getCurrentUser() != null); }
 }
