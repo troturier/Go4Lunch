@@ -18,6 +18,8 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -46,5 +48,8 @@
             android:value="@string/google_maps_key" />
 
     </application>
+
+    <uses-feature android:glEsVersion="0x00020000"
+        android:required="true"/>
 
 </manifest>

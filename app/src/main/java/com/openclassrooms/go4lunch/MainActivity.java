@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -13,8 +15,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,12 +29,17 @@ import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.openclassrooms.go4lunch.api.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
+import com.openclassrooms.go4lunch.utils.ViewPagerAdapter;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -39,7 +48,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     //FOR DESIGN
     @BindView(R.id.main_activity_linear_layout)
@@ -56,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private User currentUser;
 
     private DrawerLayout mDrawerLayout;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
 
     // --------------------
     // LIFE CYCLE
@@ -101,6 +112,11 @@ public class MainActivity extends AppCompatActivity {
             UserHelper.getUser(Objects.requireNonNull(this.getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> currentUser = documentSnapshot.toObject(User.class));
             this.configureToolbar();
             this.updateUIWhenCreating();
+            viewPager = (ViewPager) findViewById(R.id.viewpager);
+            setupViewPager(viewPager);
+
+            tabLayout = (TabLayout) findViewById(R.id.tabs);
+            tabLayout.setupWithViewPager(viewPager);
         }
     }
 
@@ -108,14 +124,14 @@ public class MainActivity extends AppCompatActivity {
     // ACTIONS
     // --------------------
 
-    @OnClick(R.id.profile_activity_button_delete)
+    /* @OnClick(R.id.profile_activity_button_delete)
     public void onClickDeleteButton() {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.popup_message_confirmation_delete_account)
                 .setPositiveButton(R.string.popup_message_choice_yes, (dialogInterface, i) -> deleteUserFromFirebase())
                 .setNegativeButton(R.string.popup_message_choice_no, null)
                 .show();
-    }
+    } */
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -312,4 +328,20 @@ public class MainActivity extends AppCompatActivity {
     protected FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
 
     protected Boolean isCurrentUserLogged(){ return (this.getCurrentUser() != null); }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+    }
+
+    //
+
+    //
+
+    private void setupViewPager(ViewPager viewPager) {
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(new com.openclassrooms.go4lunch.activities.fragments.MapFragment(), "Map");
+        viewPager.setAdapter(adapter);
+    }
+
 }
