@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/F:/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/navigation/ic_menu_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/F:/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_view_list_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,8 +28,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_menu" />
+                            <entry key="outputName" value="ic_view_list" />
                             <entry key="sourceFile" value="F:\Github_projects\Ressources\baseline-power_settings_new-24px.svg" />
                           </map>
                         </option>

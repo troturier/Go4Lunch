@@ -23,13 +23,6 @@
             android:background="?attr/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabMode="fixed"
-                app:tabGravity="fill"/>
-
         </android.support.design.widget.AppBarLayout>
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -39,39 +32,32 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/viewpager"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"  />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:layout_above="@+id/tabs"/>
 
-        <!--
-                    // BUTTONS CONTAINER
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabGravity="fill"
+                app:tabMode="fixed"
+                app:tabSelectedTextColor="@color/colorPrimary"
+                app:tabIndicatorHeight="0dp"
+                android:layout_alignParentBottom="true"
+                android:background="@android:color/white"
+                />
 
-                        // BUTTON DELETE ACCOUNT
-                        <Button
-                            android:id="@+id/profile_activity_button_delete"
-                            style="?android:attr/borderlessButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="@dimen/default_margin"
-                            android:background="@drawable/button_radius_error_color"
-                            android:padding="@dimen/default_margin"
-                            android:text="@string/button_delete_account"
-                            android:textColor="#fff"
-                            android:textSize="@dimen/default_text_size" />
+            </RelativeLayout>
 
-                    </LinearLayout>
-        -->
-                </LinearLayout>
+        </LinearLayout>
 
     </FrameLayout>
 
@@ -86,6 +72,8 @@
         android:background="@color/colorDrawer"
         app:itemTextColor="@android:color/white"
         app:itemIconTint="@android:color/white"
-        />
+        >
+
+    </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>
