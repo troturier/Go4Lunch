@@ -43,6 +43,7 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -84,8 +85,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     int id = menuItem.getItemId();
 
-                    switch (id){
-                        case R.id.nav_logout :
+                    switch (id) {
+                        case R.id.nav_logout:
                             signOutUserFromFirebase();
                             break;
                         case R.id.nav_lunch:
@@ -100,10 +101,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return true;
                 });
 
-        if(!isCurrentUserLogged()){
+        if (!isCurrentUserLogged()) {
             startSignInActivity();
-        }
-        else{
+        } else {
             // startSignInActivity();
             UserHelper.getUser(Objects.requireNonNull(this.getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> currentUser = documentSnapshot.toObject(User.class));
             this.configureToolbar();
@@ -338,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new com.openclassrooms.go4lunch.activities.fragments.MapFragment(), "Map");
+        adapter.addFragment(new com.openclassrooms.go4lunch.activities.fragments.MapFragment(), "Map View");
         viewPager.setAdapter(adapter);
     }
 
@@ -364,6 +364,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
 }
