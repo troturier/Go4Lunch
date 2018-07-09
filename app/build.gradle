@@ -12,6 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -22,23 +23,24 @@ android {
             testCoverageEnabled true
         }
     }
-    buildToolsVersion '28.0.0 rc1'
+    buildToolsVersion '28.0.1'
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     //GLIDE
-    implementation 'com.github.bumptech.glide:glide:4.3.1'
+    implementation 'com.github.bumptech.glide:glide:4.4.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 
     //BUTTERKNIFE
@@ -46,19 +48,21 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
     // Firebase
-    implementation "com.google.firebase:firebase-core:11.8.0"
-    implementation 'com.google.firebase:firebase-messaging:11.8.0'
+    implementation "com.google.firebase:firebase-core:16.0.1"
+    implementation 'com.google.firebase:firebase-messaging:17.1.0'
+    implementation 'com.google.firebase:firebase-auth:16.0.2'
 
     // Firestore
     implementation 'com.firebaseui:firebase-ui-firestore:3.1.3'
+    implementation 'com.google.firebase:firebase-firestore:17.0.2'
 
     // FirebaseUI
     implementation 'com.firebaseui:firebase-ui-storage:3.1.3'
-    implementation 'com.firebaseui:firebase-ui-auth:3.1.3'
-    implementation 'com.firebaseui:firebase-ui-firestore:3.1.3'
+    implementation 'com.firebaseui:firebase-ui-auth:4.0.0'
 
     // FACEBOOK LOGIN SUPPORT
-    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    // implementation 'com.facebook.android:facebook-android-sdk:4.34.0'
+    implementation 'com.facebook.android:facebook-login:4.34.0'
 
     //EASY PERMISSIONS
     implementation 'pub.devrel:easypermissions:1.1.1'
@@ -67,6 +71,27 @@ dependencies {
     implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
     }
+    implementation 'com.android.support:support-annotations:27.1.1'
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:support-v13:27.1.1'
+    implementation 'com.android.support:support-vector-drawable:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:gridlayout-v7:27.1.1'
+    implementation 'com.android.support:mediarouter-v7:27.1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
+    implementation 'com.android.support:palette-v7:27.1.1'
+    implementation 'com.android.support:leanback-v17:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:exifinterface:27.1.1'
+    implementation 'com.android.support.test.espresso:espresso-contrib:3.0.2'
+    implementation 'com.android.databinding:library:3.1.3'
+    implementation 'com.android.databinding:baseLibrary:3.1.3'
+    implementation 'com.android.databinding:compiler:3.1.3'
+    implementation 'com.android.databinding:adapters:3.1.3'
+    implementation 'com.google.android.gms:play-services-ads:15.0.1'
+    implementation 'com.google.android.gms:play-services-wearable:15.0.1'
+    annotationProcessor 'com.android.databinding:compiler:3.1.3'
+    implementation 'com.android.support:multidex:1.0.3'
 }
 
 configurations.all {
@@ -81,5 +106,7 @@ tasks.coveralls {
     dependsOn 'connectedAndroidTest'
     onlyIf { System.env.'CI' }
 }
+
+
 
 apply plugin: 'com.google.gms.google-services'

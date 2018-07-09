@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 123;
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
-    private FirebaseAuth mAuth;
     private User currentUser;
 
     private DrawerLayout mDrawerLayout;
@@ -198,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
             // 5 - Get additional data from Firestore
             UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(documentSnapshot -> {
                 currentUser = documentSnapshot.toObject(User.class);
-                String username = TextUtils.isEmpty(currentUser.getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
+                String username = TextUtils.isEmpty(Objects.requireNonNull(currentUser).getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
                 drawerUsername.setText(username);
             });
         }
@@ -241,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected OnFailureListener onFailureListener(){
         // return e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
-        return e -> Log.d("Failure", "Problème de suppression", e);
+        return e -> Log.d("Failure", "Error", e);
     }
 
     // --------------------
@@ -276,8 +275,9 @@ public class MainActivity extends AppCompatActivity {
                                 .createSignInIntentBuilder()
                                 .setTheme(R.style.LoginTheme)
                                 .setAvailableProviders(
-                                        Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(), //EMAIL
-                                                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build())) // SUPPORT GOOGLE))
+                                        Arrays.asList(
+                                                new AuthUI.IdpConfig.GoogleBuilder().build(),
+                                                new AuthUI.IdpConfig.FacebookBuilder().build()))
                                 .setIsSmartLockEnabled(false, true)
                                 .setLogo(R.drawable.ic_logo)
                                 .build(),
@@ -299,9 +299,9 @@ public class MainActivity extends AppCompatActivity {
             } else { // ERRORS
                 if (response == null) {
                     showSnackBar(this.linearLayout, getString(R.string.error_authentication_canceled));
-                } else if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                } else if (Objects.requireNonNull(response.getError()).getErrorCode() == ErrorCodes.NO_NETWORK) {
                     showSnackBar(this.linearLayout, getString(R.string.error_no_internet));
-                } else if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                } else if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                     showSnackBar(this.linearLayout, getString(R.string.error_unknown_error));
                 }
             }
