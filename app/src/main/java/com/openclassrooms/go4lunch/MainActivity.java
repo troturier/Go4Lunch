@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (!isCurrentUserLogged()) {
             startSignInActivity();
         } else {
-            // startSignInActivity();
             UserHelper.getUser(Objects.requireNonNull(this.getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> currentUser = documentSnapshot.toObject(User.class));
             this.configureToolbar();
             this.updateUIWhenCreating();
@@ -221,8 +220,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return aVoid -> {
             switch (origin){
                 case RC_SIGN_IN:
+                    UserHelper.getUser(Objects.requireNonNull(this.getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> currentUser = documentSnapshot.toObject(User.class));
                     this.configureToolbar();
                     this.updateUIWhenCreating();
+
+                    viewPager = findViewById(R.id.viewpager);
+                    setupViewPager(viewPager);
+
+                    tabLayout = findViewById(R.id.tabs);
+                    tabLayout.setupWithViewPager(viewPager);
+                    setupTabsStyle(tabLayout, viewPager);
                     break;
                 case SIGN_OUT_TASK:
                     startSignInActivity();
@@ -271,8 +278,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case RESULT_OK:
                 this.handleResponseAfterSignIn(requestCode, resultCode, data);
+                UserHelper.getUser(Objects.requireNonNull(this.getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> currentUser = documentSnapshot.toObject(User.class));
                 this.configureToolbar();
                 this.updateUIWhenCreating();
+
+                viewPager = findViewById(R.id.viewpager);
+                setupViewPager(viewPager);
+
+                tabLayout = findViewById(R.id.tabs);
+                tabLayout.setupWithViewPager(viewPager);
+                setupTabsStyle(tabLayout, viewPager);
                 break;
             default:
                 startSignInActivity();
