@@ -3,18 +3,27 @@ package com.openclassrooms.go4lunch.activities.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.location.Location;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -22,14 +31,23 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.openclassrooms.go4lunch.R;
+import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
+import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
-public class MapFragment extends Fragment implements OnMapReadyCallback{
+@SuppressWarnings("FieldCanBeLocal")
+public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mGoogleMap;
     private MapView mapView;
@@ -38,6 +56,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
     private final int RC_LOCATION = 1234;
 
+    private static final float DEFAULT_ZOOM = 15f;
+
+    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
+            new LatLng(-40, -168), new LatLng(71, 136));
+
+    //widgets
+    private AutoCompleteTextView mSearchText;
+
+    private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
+    private GoogleApiClient mGoogleApiClient;
+
+    private final int PROXIMITY_RADIUS = 10000;
+    private double latitude;
+    private double longitude;
+
     public MapFragment() {
         // Required empty public constructor
     }
@@ -45,26 +78,90 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
+        mSearchText = getActivity().findViewById(R.id.input_search);
+
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(getActivity())
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .addApi(LocationServices.API)
+                .enableAutoManage(getActivity(), this)
+                .build();
+
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                .setCountry("FR")
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
+                .build();
+
+        mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(getActivity(), mGoogleApiClient,
+                LAT_LNG_BOUNDS, typeFilter);
+
+        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
+
+        mSearchText.setOnItemClickListener((parent, view, position, id) -> geoLocate());
+
+        mSearchText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if(actionId == EditorInfo.IME_ACTION_SEARCH
+                    || actionId == EditorInfo.IME_ACTION_DONE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER){
+
+                //execute our method for searching
+                geoLocate();
+            }
+
+            return false;
+        });
+
+
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_map, container, false);
         return mView;
+    }
+
+    private void geoLocate(){
+        Log.d("GeoLocate", "geoLocate: geolocating");
+
+        String searchString = mSearchText.getText().toString();
+
+        Geocoder geocoder = new Geocoder(getActivity());
+        List<Address> list = new ArrayList<>();
+        try{
+            list = geocoder.getFromLocationName(searchString, 1);
+        }catch (IOException e){
+            Log.e("GeoLocate", "geoLocate: IOException: " + e.getMessage() );
+        }
+
+        if(list.size() > 0){
+            Address address = list.get(0);
+
+            Log.d("GeoLocate", "geoLocate: found a location: " + address.toString());
+            //Toast.makeText(this, address.toString(), Toast.LENGTH_SHORT).show();
+
+            moveCamera(new LatLng(address.getLatitude(), address.getLongitude())
+            );
+        }
+    }
+
+    private void moveCamera(LatLng latLng){
+        Log.d("Move Camera", "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MapFragment.DEFAULT_ZOOM));
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mapView = (MapView) mView.findViewById(R.id.mapView);
+        mapView = mView.findViewById(R.id.mapView);
         if (mapView != null) {
             mapView.onCreate(null);
             mapView.onResume();
             mapView.getMapAsync(this);
         }
-
     }
 
     @SuppressLint("MissingPermission")
@@ -72,26 +169,72 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        MapsInitializer.initialize(getContext());
+        MapsInitializer.initialize(Objects.requireNonNull(getContext()));
 
         mGoogleMap = googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mGoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Objects.requireNonNull(getActivity()), R.raw.map_style));
 
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(getActivity(), perms)) {
+        if (EasyPermissions.hasPermissions(Objects.requireNonNull(getActivity()), perms)) {
             mGoogleMap.setMyLocationEnabled(true);
             mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
             mFusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                CameraPosition user = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(16).bearing(0).build();
-                                mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(user));
+                    .addOnSuccessListener(getActivity(), location -> {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            CameraPosition user = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(16).bearing(0).build();
+                            mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(user));
+
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
+
+                            // -------------- RESTAURANT ------------------- //
+
+                            String restaurant = "restaurant";
+
+                            String url = getUrl(latitude, longitude, restaurant);
+
+                            Object dataTransfer[] = new Object[2];
+
+                            dataTransfer[0] = mGoogleMap;
+                            dataTransfer[1] = url;
+
+                            GetNearbyPlacesData getNearbyPlacesData1 = new GetNearbyPlacesData();
+
+                            getNearbyPlacesData1.execute(dataTransfer);
+
+
+                            // -------------- MEAL TAKEAWAY ------------------- //
+
+                            String meal_takeaway = "meal_takeaway";
+
+                            url = getUrl(latitude, longitude, meal_takeaway);
+
+                            Object dataTransfer2[] = new Object[2];
+
+                            dataTransfer2[0] = mGoogleMap;
+                            dataTransfer2[1] = url;
+
+                            GetNearbyPlacesData getNearbyPlacesData2 = new GetNearbyPlacesData();
+
+                            getNearbyPlacesData2.execute(dataTransfer2);
+
+                            // -------------- MEAL DELIVERY ------------------- //
+                            String meal_delivery = "meal_delivery";
+
+                            url = getUrl(latitude, longitude, meal_delivery);
+
+                            Object dataTransfer3[] = new Object[2];
+
+                            dataTransfer3[0] = mGoogleMap;
+                            dataTransfer3[1] = url;
+
+                             GetNearbyPlacesData getNearbyPlacesData3 = new GetNearbyPlacesData();
+
+                             getNearbyPlacesData3.execute(dataTransfer3);
                             }
-                        }
                     });
         }
         else {
@@ -102,7 +245,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
     @SuppressLint("MissingPermission")
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
@@ -111,33 +254,46 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             case RC_LOCATION: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
+                    // permission was granted
                     Toast.makeText(getActivity(), "Permission granted", Toast.LENGTH_SHORT).show();
 
                     mGoogleMap.setMyLocationEnabled(true);
                     mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
                     mFusedLocationClient.getLastLocation()
-                            .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                                @Override
-                                public void onSuccess(Location location) {
-                                    // Got last known location. In some rare situations this can be null.
-                                    if (location != null) {
-                                        CameraPosition user = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(16).bearing(0).build();
-                                        mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(user));
-                                    }
+                            .addOnSuccessListener(Objects.requireNonNull(getActivity()), location -> {
+                                // Got last known location. In some rare situations this can be null.
+                                if (location != null) {
+                                    CameraPosition user = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(16).bearing(0).build();
+                                    mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(user));
                                 }
                             });
 
                 } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // permission denied
                     Toast.makeText(getActivity(), "Permission denied", Toast.LENGTH_SHORT).show();
                 }
-                return;
             }
         }
+    }
+
+    private String getUrl(double latitude , double longitude , String nearbyPlace)
+    {
+
+        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        googlePlaceUrl.append("location=").append(latitude).append(",").append(longitude);
+        googlePlaceUrl.append("&radius="+PROXIMITY_RADIUS);
+        googlePlaceUrl.append("&type=").append(nearbyPlace);
+        googlePlaceUrl.append("&sensor=true");
+        googlePlaceUrl.append("&key=").append(getResources().getString(R.string.google_maps_key));
+
+        Log.d("MapsActivity", "url = "+googlePlaceUrl.toString());
+
+        return googlePlaceUrl.toString();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }

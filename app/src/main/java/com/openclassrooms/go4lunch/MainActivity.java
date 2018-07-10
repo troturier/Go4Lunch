@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -28,15 +29,13 @@ import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.openclassrooms.go4lunch.api.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
-import com.openclassrooms.go4lunch.utils.ViewPagerAdapter;
+import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -45,15 +44,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity {
 
     //FOR DESIGN
     @BindView(R.id.main_activity_linear_layout)
     LinearLayout linearLayout;
 
-    ImageView drawerImageviewProfile;
-    TextView drawerEmail;
-    TextView drawerUsername;
+    private TextView drawerUsername;
 
     //FOR DATA
     private static final int RC_SIGN_IN = 123;
@@ -64,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DrawerLayout mDrawerLayout;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+
+    // --Commented out by Inspection (10/07/2018 13:42):private Menu menu;
 
     // --------------------
     // LIFE CYCLE
@@ -114,7 +113,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             tabLayout = findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(viewPager);
             setupTabsStyle(tabLayout, viewPager);
+
+
+            /* final ArrayAdapterSearchView searchView = (ArrayAdapterSearchView)searchItem.getActionView();
+            searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                    searchView.setText(menu.getItem(position).toString());
+
+                }
+            });*/
         }
+
+
     }
 
     // --------------------
@@ -150,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
     }
 
+    @SuppressWarnings("unused")
     private void deleteUserFromFirebase(){
         if (this.getCurrentUser() != null) {
 
@@ -189,8 +202,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             NavigationView navigationView = findViewById(R.id.nav_view);
             View headerView = navigationView.getHeaderView(0);
 
-            drawerImageviewProfile = headerView.findViewById(R.id.drawer_imageview_profile);
-            drawerEmail = headerView.findViewById(R.id.drawer_email);
+            ImageView drawerImageviewProfile = headerView.findViewById(R.id.drawer_imageview_profile);
+            TextView drawerEmail = headerView.findViewById(R.id.drawer_email);
             drawerUsername = headerView.findViewById(R.id.drawer_username);
 
             //Get picture URL from Firebase
@@ -205,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             String email = TextUtils.isEmpty(this.getCurrentUser().getEmail()) ? getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
 
             //Update views with data
-            this.drawerEmail.setText(email);
+            drawerEmail.setText(email);
 
             // 5 - Get additional data from Firestore
             UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(documentSnapshot -> {
@@ -243,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         };
     }
 
-    protected void configureToolbar(){
+    private void configureToolbar(){
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(android.graphics.Color.WHITE);
@@ -259,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // ERROR HANDLER
     // --------------------
 
-    protected OnFailureListener onFailureListener(){
+    private OnFailureListener onFailureListener(){
         // return e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
         return e -> Log.d("Failure", "Error", e);
     }
@@ -284,7 +297,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 viewPager = findViewById(R.id.viewpager);
                 setupViewPager(viewPager);
-
                 tabLayout = findViewById(R.id.tabs);
                 tabLayout.setupWithViewPager(viewPager);
                 setupTabsStyle(tabLayout, viewPager);
@@ -338,14 +350,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Nullable
-    protected FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
+    private FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
 
-    protected Boolean isCurrentUserLogged(){ return (this.getCurrentUser() != null); }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-
-    }
+    private Boolean isCurrentUserLogged(){ return (this.getCurrentUser() != null); }
 
     // --------------------
     // TABS
@@ -358,35 +365,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void setupTabsStyle(TabLayout tabLayout, ViewPager viewPager) {
-        tabLayout.getTabAt(0).setIcon(R.drawable.ic_map);
-        tabLayout.getTabAt(0).setText("Map View");
+        Objects.requireNonNull(tabLayout.getTabAt(0)).setIcon(R.drawable.ic_map);
+        Objects.requireNonNull(tabLayout.getTabAt(0)).setText("Map View");
 
-        tabLayout.getTabAt(tabLayout.getSelectedTabPosition()).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
+        Objects.requireNonNull(Objects.requireNonNull(tabLayout.getTabAt(tabLayout.getSelectedTabPosition())).getIcon()).setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
 
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager) {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
-                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
+                if (tab.getIcon() != null) {
+                    tab.getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
+                }
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                tab.getIcon().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
+                if (tab.getIcon() != null) {
+                    tab.getIcon().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
+                }
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        // Forward results to EasyPermissions
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
 }
