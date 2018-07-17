@@ -72,7 +72,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:button="@drawable/checkbox_detail_like" />
+                    android:button="@drawable/checkbox_detail_like"
+                    android:clickable="false"/>
 
             </LinearLayout>
 
