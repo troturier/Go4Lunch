@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -52,17 +53,32 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     public void openWebsite(@SuppressWarnings("unused") View view){
-        Intent intent = new Intent(this, WebViewActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("url", url);
-        intent.putExtras(bundle);
-        startActivity(intent);
+        if(!url.isEmpty()) {
+            Intent intent = new Intent(this, WebViewActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("url", url);
+            intent.putExtras(bundle);
+            startActivity(intent);
+        }
+        else{
+            Snackbar.make(view, "No website found for this restaurant", Snackbar.LENGTH_LONG).show();
+        }
     }
 
     public void openCallingApp(@SuppressWarnings("unused") View view){
         Intent callIntent  = new Intent(Intent.ACTION_DIAL);
         callIntent.setData(Uri.parse("tel:"+phone_number));
         startActivity(callIntent);
+    }
+
+    public void likeRestaurant(View view){
+        CheckBox cb_like = findViewById(R.id.detail_cb_like);
+        if (cb_like.isChecked()){
+            cb_like.setChecked(false);
+        }
+        else {
+            cb_like.setChecked(true);
+        }
     }
 
     private void getPhotos(String id) {
