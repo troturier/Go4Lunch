@@ -56,10 +56,11 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
             String vicinity = googlePlace.get("vicinity");
             double lat = Double.parseDouble( googlePlace.get("lat"));
             double lng = Double.parseDouble( googlePlace.get("lng"));
-
+            String id = googlePlace.get("id");
             LatLng latLng = new LatLng( lat, lng);
             markerOptions.position(latLng);
             markerOptions.title(placeName + " : "+ vicinity);
+            markerOptions.snippet(id);
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
 
             mMap.addMarker(markerOptions);

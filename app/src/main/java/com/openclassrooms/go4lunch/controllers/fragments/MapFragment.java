@@ -1,7 +1,8 @@
-package com.openclassrooms.go4lunch.activities.fragments;
+package com.openclassrooms.go4lunch.controllers.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.openclassrooms.go4lunch.R;
+import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 
@@ -51,6 +54,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     private MapView mapView;
     private View mView;
     private FusedLocationProviderClient mFusedLocationClient;
+
+    private Place selected_place;
 
     private final int RC_LOCATION = 1234;
 
@@ -165,6 +170,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         mGoogleMap = googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mGoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Objects.requireNonNull(getActivity()), R.raw.map_style));
+
+        mGoogleMap.setOnMarkerClickListener(marker -> {
+
+            String id = marker.getSnippet();
+
+            Places.GeoDataApi.getPlaceById(mGoogleApiClient, id)
+                    .setResultCallback(places -> {
+                        if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                            selected_place = places.get(0);
+                            Log.i("PlacesTest", "Place found: " + selected_place.getName());
+                            Intent intent = new Intent(getActivity(), DetailActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putString("place_id", selected_place.getId());
+                            bundle.putString("place_website", selected_place.getWebsiteUri().toString());
+                            bundle.putString("place_name", selected_place.getName().toString());
+                            bundle.putString("place_address", Objects.requireNonNull(selected_place.getAddress()).toString());
+                            bundle.putString("place_type", selected_place.getPlaceTypes().toString());
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                        } else {
+                            Log.e("PlacesTest", "Place not found");
+                        }
+                        places.release();
+                    });
+            return true;
+        });
 
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(Objects.requireNonNull(getActivity()), perms)) {

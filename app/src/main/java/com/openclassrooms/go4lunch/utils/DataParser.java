@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class DataParser {
@@ -18,9 +19,10 @@ public class DataParser {
         HashMap<String, String> googlePlaceMap = new HashMap<>();
         String placeName = "--NA--";
         String vicinity= "--NA--";
-        String latitude= "";
-        String longitude="";
-        String reference="";
+        String latitude;
+        String longitude;
+        String reference;
+        String id="";
 
         Log.d("DataParser","jsonobject ="+googlePlaceJson.toString());
 
@@ -31,6 +33,9 @@ public class DataParser {
             }
             if (!googlePlaceJson.isNull("vicinity")) {
                 vicinity = googlePlaceJson.getString("vicinity");
+            }
+            if(!googlePlaceJson.isNull("place_id")) {
+                id = googlePlaceJson.getString("place_id");
             }
 
             latitude = googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lat");
@@ -43,6 +48,7 @@ public class DataParser {
             googlePlaceMap.put("lat", latitude);
             googlePlaceMap.put("lng", longitude);
             googlePlaceMap.put("reference", reference);
+            googlePlaceMap.put("id", id);
 
 
         }
@@ -56,7 +62,7 @@ public class DataParser {
     {
         int count = jsonArray.length();
         List<HashMap<String, String>> placelist = new ArrayList<>();
-        HashMap<String, String> placeMap = null;
+        HashMap<String, String> placeMap;
 
         for(int i = 0; i<count;i++)
         {
@@ -83,6 +89,6 @@ public class DataParser {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return getPlaces(jsonArray);
+        return getPlaces(Objects.requireNonNull(jsonArray));
     }
 }
