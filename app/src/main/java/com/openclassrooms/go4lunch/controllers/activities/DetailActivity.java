@@ -2,6 +2,7 @@ package com.openclassrooms.go4lunch.controllers.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,6 +24,7 @@ import com.openclassrooms.go4lunch.R;
 public class DetailActivity extends AppCompatActivity {
 
     private String url;
+    private String phone_number;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class DetailActivity extends AppCompatActivity {
         getPhotos(intent.getStringExtra("place_id"));
 
         url = intent.getStringExtra("place_website");
+        phone_number = intent.getStringExtra("place_phone");
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -54,6 +57,12 @@ public class DetailActivity extends AppCompatActivity {
         bundle.putString("url", url);
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    public void openCallingApp(@SuppressWarnings("unused") View view){
+        Intent callIntent  = new Intent(Intent.ACTION_DIAL);
+        callIntent.setData(Uri.parse("tel:"+phone_number));
+        startActivity(callIntent);
     }
 
     private void getPhotos(String id) {

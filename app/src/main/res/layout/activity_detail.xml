@@ -94,15 +94,16 @@
 
             <Button
                 android:id="@+id/detail_call"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:background="@android:color/white"
                 android:drawableTop="@drawable/ic_phone"
+                android:onClick="openCallingApp"
                 android:text="@string/call"
-                android:textColor="@color/colorPrimary"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:textColor="@color/colorPrimary" />
 
             <Button
                 android:id="@+id/detail_like"

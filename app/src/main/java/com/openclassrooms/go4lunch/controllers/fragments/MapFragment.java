@@ -185,6 +185,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                             bundle.putString("place_id", selected_place.getId());
                             bundle.putString("place_website", selected_place.getWebsiteUri().toString());
                             bundle.putString("place_name", selected_place.getName().toString());
+                            bundle.putString("place_phone", selected_place.getPhoneNumber().toString());
                             bundle.putString("place_address", Objects.requireNonNull(selected_place.getAddress()).toString());
                             bundle.putString("place_type", selected_place.getPlaceTypes().toString());
                             intent.putExtras(bundle);
