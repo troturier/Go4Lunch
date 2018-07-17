@@ -51,4 +51,7 @@
     <string name="email_address">E-mail address</string>
     <string name="title_activity_maps">Map</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="rational_string">Without these permissions, the application is unable to function properly. They are needed to use geolocation services. Please allow them in order to use this application in the best possible conditions.</string>
+    <string name="search_restaurants">Search restaurants</string>
+    <string name="search_button">Search button</string>
 </resources>
