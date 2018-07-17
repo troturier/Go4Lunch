@@ -1,4 +1,4 @@
-package com.openclassrooms.go4lunch;
+package com.openclassrooms.go4lunch.controllers.activities;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -32,6 +32,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.api.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;

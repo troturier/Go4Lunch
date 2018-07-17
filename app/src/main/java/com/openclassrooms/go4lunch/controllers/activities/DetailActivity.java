@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,13 +21,19 @@ import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
 import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
 import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.openclassrooms.go4lunch.R;
+import com.openclassrooms.go4lunch.api.RestaurantHelper;
 
 public class DetailActivity extends AppCompatActivity {
 
     private String url;
     private String phone_number;
+    private String id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +50,9 @@ public class DetailActivity extends AppCompatActivity {
         TextView place_address = findViewById(R.id.detail_address);
         place_address.setText(intent.getStringExtra("place_address"));
 
-        getPhotos(intent.getStringExtra("place_id"));
+        id = intent.getStringExtra("place_id");
+
+        getPhotos(id);
 
         url = intent.getStringExtra("place_website");
         phone_number = intent.getStringExtra("place_phone");
@@ -50,6 +60,8 @@ public class DetailActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
+
+        checkIfDocumentExists(getCurrentUser().getUid(), id);
     }
 
     public void openWebsite(@SuppressWarnings("unused") View view){
@@ -73,10 +85,13 @@ public class DetailActivity extends AppCompatActivity {
 
     public void likeRestaurant(View view){
         CheckBox cb_like = findViewById(R.id.detail_cb_like);
-        if (cb_like.isChecked()){
+
+        if(cb_like.isChecked()){
+            deleteRestaurantInFireStore();
             cb_like.setChecked(false);
         }
-        else {
+        else{
+            createRestaurantInFireStore();
             cb_like.setChecked(true);
         }
     }
@@ -104,4 +119,41 @@ public class DetailActivity extends AppCompatActivity {
             });
         });
     }
+
+    // --------------------------------
+    // REST
+    // --------------------------------
+
+    @Nullable
+    private FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
+
+    private void createRestaurantInFireStore(){
+        if (this.getCurrentUser() != null){
+            RestaurantHelper.createRestaurant(getCurrentUser().getUid(), id);
+        }
+    }
+
+    private void deleteRestaurantInFireStore(){
+        if (this.getCurrentUser() != null){
+            RestaurantHelper.deleteRestaurant(getCurrentUser().getUid(), id);
+        }
+    }
+
+
+    public Boolean checkIfDocumentExists(String uid, String id){
+        Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection(uid).document(id).get();
+        final Boolean[] bool = new Boolean[1];
+        doc.addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                bool[0] = doc.getResult().exists();
+                if(bool[0]){
+                    CheckBox cb_like = findViewById(R.id.detail_cb_like);
+                    cb_like.setChecked(true);
+                }
+            }
+        });
+        return bool[0];
+    }
+
 }

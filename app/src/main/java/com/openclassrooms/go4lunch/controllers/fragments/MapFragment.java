@@ -119,6 +119,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
     }
 
+    @AfterPermissionGranted(RC_LOCATION)
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_map, container, false);
@@ -151,17 +152,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        mapView = mView.findViewById(R.id.mapView);
-        if (mapView != null) {
-            mapView.onCreate(null);
-            mapView.onResume();
-            mapView.getMapAsync(this);
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(Objects.requireNonNull(getActivity()), perms)) {
+            mapView = mView.findViewById(R.id.mapView);
+            if (mapView != null) {
+                mapView.onCreate(null);
+                mapView.onResume();
+                mapView.getMapAsync(this);
+            }
+        }
+        else {
+            EasyPermissions.requestPermissions(this, getString(R.string.rational_string), RC_LOCATION, perms);
         }
     }
 
     @SuppressLint("MissingPermission")
-    @AfterPermissionGranted(RC_LOCATION)
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -170,6 +175,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         mGoogleMap = googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mGoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Objects.requireNonNull(getActivity()), R.raw.map_style));
+
+        mGoogleMap.setMyLocationEnabled(true);
+        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
         mGoogleMap.setOnMarkerClickListener(marker -> {
 
@@ -183,9 +191,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                             Intent intent = new Intent(getActivity(), DetailActivity.class);
                             Bundle bundle = new Bundle();
                             bundle.putString("place_id", selected_place.getId());
-                            bundle.putString("place_website", selected_place.getWebsiteUri().toString());
+                            bundle.putString("place_website", Objects.requireNonNull(selected_place.getWebsiteUri()).toString());
                             bundle.putString("place_name", selected_place.getName().toString());
-                            bundle.putString("place_phone", selected_place.getPhoneNumber().toString());
+                            bundle.putString("place_phone", Objects.requireNonNull(selected_place.getPhoneNumber()).toString());
                             bundle.putString("place_address", Objects.requireNonNull(selected_place.getAddress()).toString());
                             bundle.putString("place_type", selected_place.getPlaceTypes().toString());
                             intent.putExtras(bundle);
@@ -197,14 +205,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                     });
             return true;
         });
-
-        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(Objects.requireNonNull(getActivity()), perms)) {
-            locateUser();
-        }
-        else {
-            EasyPermissions.requestPermissions(this, getString(R.string.rational_string), RC_LOCATION, perms);
-        }
+        locateUser();
     }
 
     @SuppressLint("MissingPermission")
@@ -217,11 +218,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     }
 
     @SuppressLint("MissingPermission")
-    @AfterPermissionGranted(RC_LOCATION)
     private void locateUser() {
         if (EasyPermissions.hasPermissions(Objects.requireNonNull(getContext()), Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            mGoogleMap.setMyLocationEnabled(true);
-            mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+            MapsInitializer.initialize(Objects.requireNonNull(getContext()));
 
             mFusedLocationClient.getLastLocation()
                     .addOnSuccessListener(Objects.requireNonNull(getActivity()), location -> {
@@ -296,7 +296,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     @SuppressLint("MissingPermission")
     @Override
     public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-        locateUser();
+        mapView = mView.findViewById(R.id.mapView);
+        if (mapView != null) {
+            mapView.onCreate(null);
+            mapView.onResume();
+            mapView.getMapAsync(this);
+        }
         }
 
     @Override
