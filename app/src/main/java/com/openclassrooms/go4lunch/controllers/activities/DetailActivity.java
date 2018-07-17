@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +21,8 @@ import com.google.android.gms.tasks.Task;
 import com.openclassrooms.go4lunch.R;
 
 public class DetailActivity extends AppCompatActivity {
+
+    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +41,19 @@ public class DetailActivity extends AppCompatActivity {
 
         getPhotos(intent.getStringExtra("place_id"));
 
+        url = intent.getStringExtra("place_website");
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
+    }
+
+    public void openWebsite(@SuppressWarnings("unused") View view){
+        Intent intent = new Intent(this, WebViewActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("url", url);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
     private void getPhotos(String id) {

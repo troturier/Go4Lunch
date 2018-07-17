@@ -55,6 +55,7 @@
             android:name=".controllers.activities.DetailActivity"
             android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme"></activity>
+        <activity android:name=".controllers.activities.WebViewActivity" />
     </application>
 
 </manifest>
