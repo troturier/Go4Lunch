@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         assert actionbar != null;
         actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setTitle("I'm Hungry !");
+        actionbar.setTitle(R.string.im_hungry);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
     }
 
@@ -360,12 +360,16 @@ public class MainActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.MapFragment(), "Map View");
+        adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment(), "List View");
         viewPager.setAdapter(adapter);
     }
 
     private void setupTabsStyle(TabLayout tabLayout, ViewPager viewPager) {
         Objects.requireNonNull(tabLayout.getTabAt(0)).setIcon(R.drawable.ic_map);
         Objects.requireNonNull(tabLayout.getTabAt(0)).setText("Map View");
+
+        Objects.requireNonNull(tabLayout.getTabAt(1)).setIcon(R.drawable.ic_view_list);
+        Objects.requireNonNull(tabLayout.getTabAt(1)).setText("List View");
 
         Objects.requireNonNull(Objects.requireNonNull(tabLayout.getTabAt(tabLayout.getSelectedTabPosition())).getIcon()).setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
 

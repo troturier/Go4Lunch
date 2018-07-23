@@ -10,4 +10,14 @@
     <string name="call">Call</string>
     <string name="like">Like</string>
     <string name="website">Website</string>
+    <string name="star_2_3">Star 2/3</string>
+    <string name="star_1_3">Star 1/3</string>
+    <string name="star_3_3">Star 3/3</string>
+    <string name="restaurant_picture">Restaurant picture</string>
+    <string name="workmates_icon">Workmates icon</string>
+    <string name="res_list_workmates_tv">(2)</string>
+    <string name="res_list_distance">120m</string>
+    <string name="res_list_opening">Open until 7pm</string>
+    <string name="res_list_address">12 rue du Faubourg Poissonnnière</string>
+    <string name="res_list_name">Le Zinc</string>
 </resources>
