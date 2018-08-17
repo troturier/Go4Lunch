@@ -21,6 +21,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -55,7 +57,7 @@
         <activity
             android:name=".controllers.activities.DetailActivity"
             android:label="@string/title_activity_detail"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/DetailActivityTheme"/>
         <activity android:name=".controllers.activities.WebViewActivity" />
     </application>
 

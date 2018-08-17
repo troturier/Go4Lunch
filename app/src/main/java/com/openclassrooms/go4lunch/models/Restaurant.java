@@ -4,20 +4,12 @@ public class Restaurant {
 
     private String uid;
 
-
     public Restaurant(String uid) {
         this.uid = uid;
     }
 
-    public Restaurant(){};
-
     public String getUid() {
         return uid;
     }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
 
 }

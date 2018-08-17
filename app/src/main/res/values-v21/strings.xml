@@ -20,4 +20,5 @@
     <string name="res_list_opening">Open until 7pm</string>
     <string name="res_list_address">12 rue du Faubourg Poissonnnière</string>
     <string name="res_list_name">Le Zinc</string>
+    <string name="place_address_type">%1$s - %2$s</string>
 </resources>

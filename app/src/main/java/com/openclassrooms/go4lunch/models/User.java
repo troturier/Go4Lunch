@@ -9,7 +9,16 @@ public class User {
     @Nullable
     private String urlPicture;
 
-    public User() {}
+    public User(String uid) {
+        this.uid = uid;
+    }
+
+    public User(){}
+
+    public User(String uid, String username) {
+        this.uid = uid;
+        this.username = username;
+    }
 
     public User(String uid, String username, @Nullable String urlPicture) {
         this.uid = uid;
@@ -20,6 +29,11 @@ public class User {
     // --- GETTERS ---
     public String getUid() { return uid; }
     public String getUsername() { return username; }
+
+    @Nullable
+    public String getUrlPicture() {
+        return urlPicture;
+    }
 
     // --- SETTERS ---
     // public void setUsername(String username) { this.username = username; }

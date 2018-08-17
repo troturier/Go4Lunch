@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="EntryPointsManager">
+    <entry_points version="2.0">
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.activities.MainActivity mGeoDataClient" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment mGeoDataClient" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment placeList" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment listLoaded" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment mProgressDialog" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment mPlaceAdapter" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment mPresenter" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment mCallback" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.data.LocationService mRouteTask" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.data.LocationService.RouteSolver destination" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.data.LocationService.RouteSolver mCallback" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.data.LocationService.RouteSolver origin" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.models.User urlPicture" />
+    </entry_points>
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="android.support.annotation.Nullable" />
+    </list>
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="newInstance" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onCreate" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onConnectionSuspended" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onAttach" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onConnected" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onStop" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onStart" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="setPresenter" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onConnectionFailed" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="showProgressIndicator" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="showNearbyPlaces" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="onCreateView" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="getUrlId" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment.FragmentListener" method="onCreationComplete" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment.FragmentListener" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="showMessage" />
+    <pattern value="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment" method="configureOnClickRecyclerView" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService" method="setCurrentEnvelope" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService" method="getCurrentLocation" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService" method="getCurrentEnvelope" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService" method="getRouteFromService" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService" method="getPlaceDetail" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService.RouteSolver" method="RouteSolver" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService.RouteSolver" method="run" />
+    <pattern value="com.openclassrooms.go4lunch.data.LocationService.RouteSolver" />
+    <pattern value="com.openclassrooms.go4lunch.data.Place" method="getBearing" />
+    <pattern value="com.openclassrooms.go4lunch.data.Place" method="compareTo" />
+    <pattern value="com.openclassrooms.go4lunch.models.User" method="setUrlPicture" />
+    <pattern value="com.openclassrooms.go4lunch.places.PlacesContract.Presenter" method="getExtentForNearbyPlaces" />
+  </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="android.support.annotation.Nullable" />
     <option name="myDefaultNotNull" value="android.support.annotation.NonNull" />

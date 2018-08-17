@@ -21,16 +21,15 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="@color/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:toolbarId="@+id/toolbar">
 
             <ImageView
                 android:id="@+id/detail_photo"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:contentDescription="@string/restaurant_photo"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/background_image"
-                android:contentDescription="@string/restaurant_photo" />
+                app:srcCompat="@drawable/background_image" />
 
 
 
@@ -45,13 +44,13 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.7"
+            android:layout_height="0dp"
+            android:layout_weight="12"
             android:background="@color/colorPrimary"
             android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="10dp"
@@ -59,21 +58,21 @@
 
                 <TextView
                     android:id="@+id/detail_name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="10dp"
-                    android:layout_weight="1"
+                    android:layout_weight="70"
                     android:text="@string/textview"
                     android:textColor="@android:color/white"
                     android:textSize="20sp" />
 
                 <CheckBox
                     android:id="@+id/detail_cb_like"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="30"
                     android:button="@drawable/checkbox_detail_like"
-                    android:clickable="false"/>
+                    android:clickable="false" />
 
             </LinearLayout>
 
@@ -87,11 +86,11 @@
         </LinearLayout>
 
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.7"
-            android:orientation="horizontal"
-            style="?android:attr/buttonBarStyle">
+            android:layout_height="0dp"
+            android:layout_weight="13"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/detail_call"
@@ -135,13 +134,15 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.4">
+            android:layout_height="0dp"
+            android:layout_weight="25">
 
-            <LinearLayout
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/detail_list_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_marginBottom="?android:attr/actionBarSize"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
         </ScrollView>
 
     </LinearLayout>

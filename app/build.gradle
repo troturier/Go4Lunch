@@ -4,11 +4,11 @@ apply plugin: 'io.fabric'
 
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.openclassrooms.go4lunch"
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -32,42 +32,36 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.esri.arcgisruntime:arcgis-android:100.3.0'
     //GLIDE
     implementation 'com.github.bumptech.glide:glide:4.4.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
-
     //BUTTERKNIFE
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
-
     // Firebase
-    implementation "com.google.firebase:firebase-core:16.0.1"
+    implementation 'com.google.firebase:firebase-core:16.0.1'
     implementation 'com.google.firebase:firebase-messaging:17.1.0'
     implementation 'com.google.firebase:firebase-auth:16.0.2'
-
     // Firestore
     implementation 'com.firebaseui:firebase-ui-firestore:3.1.3'
-    implementation 'com.google.firebase:firebase-firestore:17.0.2'
-
+    implementation 'com.google.firebase:firebase-firestore:17.0.3'
     // FirebaseUI
     implementation 'com.firebaseui:firebase-ui-storage:3.1.3'
     implementation 'com.firebaseui:firebase-ui-auth:4.0.0'
-
     // FACEBOOK LOGIN SUPPORT
     // implementation 'com.facebook.android:facebook-android-sdk:4.34.0'
     implementation 'com.facebook.android:facebook-login:4.34.0'
-
     //EASY PERMISSIONS
     implementation 'pub.devrel:easypermissions:1.1.1'
-
     //Crashlytic
     implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
