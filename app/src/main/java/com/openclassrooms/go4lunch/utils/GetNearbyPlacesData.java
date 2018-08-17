@@ -7,11 +7,18 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.openclassrooms.go4lunch.R;
+import com.openclassrooms.go4lunch.api.RestaurantHelper;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
@@ -61,9 +68,20 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
             markerOptions.position(latLng);
             markerOptions.title(placeName + " : "+ vicinity);
             markerOptions.snippet(id);
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
+            Date date = Calendar.getInstance().getTime();
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String mDate = format.format(date);
 
-            mMap.addMarker(markerOptions);
+            Task<QuerySnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").get();
+            doc.addOnCompleteListener(task -> {
+                if (task.getResult().size() > 0){
+                    markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_green));
+                }
+                else {
+                    markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
+                }
+                mMap.addMarker(markerOptions);
+            });
         }
     }
 }
