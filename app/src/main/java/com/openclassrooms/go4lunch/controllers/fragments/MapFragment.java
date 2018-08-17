@@ -3,25 +3,19 @@ package com.openclassrooms.go4lunch.controllers.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,15 +25,12 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
-import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
+import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,15 +50,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
     private final int RC_LOCATION = 1234;
 
-    private static final float DEFAULT_ZOOM = 15f;
-
-    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
-            new LatLng(-40, -168), new LatLng(71, 136));
-
-    //widgets
-    private AutoCompleteTextView mSearchText;
-
-    private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
     private GoogleApiClient mGoogleApiClient;
 
     private final int PROXIMITY_RADIUS = 10000;
@@ -82,41 +64,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
-        mSearchText = getActivity().findViewById(R.id.input_search);
-
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(getActivity())
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .addApi(LocationServices.API)
-                .enableAutoManage(getActivity(), this)
-                .build();
-
-        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
-                .setCountry("FR")
-                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
-                .build();
-
-        mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(getActivity(), mGoogleApiClient,
-                LAT_LNG_BOUNDS, typeFilter);
-
-        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
-
-        mSearchText.setOnItemClickListener((parent, view, position, id) -> geoLocate());
-
-        mSearchText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
-            if(actionId == EditorInfo.IME_ACTION_SEARCH
-                    || actionId == EditorInfo.IME_ACTION_DONE
-                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER){
-
-                geoLocate();
-            }
-
-            return false;
-        });
-
-
+        mGoogleApiClient = MainActivity.mGoogleApiClient;
     }
 
     @AfterPermissionGranted(RC_LOCATION)
@@ -126,33 +74,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         return mView;
     }
 
-    private void geoLocate(){
-        String searchString = mSearchText.getText().toString();
-
-        Geocoder geocoder = new Geocoder(getActivity());
-        List<Address> list = new ArrayList<>();
-        try{
-            list = geocoder.getFromLocationName(searchString, 1);
-        }catch (IOException e){
-            Log.e("GeoLocate", "geoLocate: IOException: " + e.getMessage() );
-        }
-
-        if(list.size() > 0){
-            Address address = list.get(0);
-
-            moveCamera(new LatLng(address.getLatitude(), address.getLongitude())
-            );
-        }
-    }
-
-    private void moveCamera(LatLng latLng){
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MapFragment.DEFAULT_ZOOM));
-    }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET};
         if (EasyPermissions.hasPermissions(Objects.requireNonNull(getActivity()), perms)) {
             mapView = mView.findViewById(R.id.mapView);
             if (mapView != null) {
@@ -190,12 +115,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                             Log.i("PlacesTest", "Place found: " + selected_place.getName());
                             Intent intent = new Intent(getActivity(), DetailActivity.class);
                             Bundle bundle = new Bundle();
-                            bundle.putString("place_id", selected_place.getId());
-                            bundle.putString("place_website", Objects.requireNonNull(selected_place.getWebsiteUri()).toString());
-                            bundle.putString("place_name", selected_place.getName().toString());
-                            bundle.putString("place_phone", Objects.requireNonNull(selected_place.getPhoneNumber()).toString());
-                            bundle.putString("place_address", Objects.requireNonNull(selected_place.getAddress()).toString());
-                            bundle.putString("place_type", selected_place.getPlaceTypes().toString());
+                            if (selected_place.getId() != null ) bundle.putString("place_id", selected_place.getId());
+                            if (selected_place.getWebsiteUri() != null )bundle.putString("place_website", selected_place.getWebsiteUri().toString());
+                            if (selected_place.getName() != null )bundle.putString("place_name", selected_place.getName().toString());
+                            if (selected_place.getPhoneNumber() != null )bundle.putString("place_phone", selected_place.getPhoneNumber().toString());
+                            if (selected_place.getAddress() != null )bundle.putString("place_address", selected_place.getAddress().toString());
+                            if (selected_place.getPlaceTypes() != null )bundle.putString("place_type", selected_place.getPlaceTypes().toString());
                             intent.putExtras(bundle);
                             startActivity(intent);
                         } else {
@@ -219,7 +144,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
     @SuppressLint("MissingPermission")
     private void locateUser() {
-        if (EasyPermissions.hasPermissions(Objects.requireNonNull(getContext()), Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (EasyPermissions.hasPermissions(Objects.requireNonNull(getContext()), Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET)) {
 
             MapsInitializer.initialize(Objects.requireNonNull(getContext()));
 
@@ -289,7 +214,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         } else {
             // Request permissions
             EasyPermissions.requestPermissions(this, getString(R.string.rational_string),
-                    RC_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
+                    RC_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.INTERNET);
         }
     }
 
@@ -306,7 +231,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms2) {
-        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET};
         EasyPermissions.requestPermissions(this, getString(R.string.rational_string), 456, perms);
     }
 
