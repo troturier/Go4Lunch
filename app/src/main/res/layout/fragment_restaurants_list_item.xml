@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_restaurant_list_item_ll"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
@@ -75,6 +76,7 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/workmates_icon"
                     android:scaleType="fitStart"
+                    android:visibility="invisible"
                     app:srcCompat="@drawable/ic_workmates_res_list" />
 
                 <TextView
@@ -83,7 +85,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/res_list_workmates_tv"
                     android:textColor="@android:color/black"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"
+                    android:visibility="invisible" />
             </LinearLayout>
 
             <LinearLayout
@@ -98,6 +101,7 @@
                     android:layout_weight="1"
                     android:contentDescription="@string/star_3_3"
                     android:scaleType="fitXY"
+                    android:visibility="invisible"
                     app:srcCompat="@drawable/ic_liked" />
 
                 <ImageView
@@ -107,6 +111,7 @@
                     android:layout_weight="1"
                     android:contentDescription="@string/star_2_3"
                     android:scaleType="fitXY"
+                    android:visibility="invisible"
                     app:srcCompat="@drawable/ic_liked" />
 
                 <ImageView
@@ -116,6 +121,7 @@
                     android:layout_weight="1"
                     android:contentDescription="@string/star_1_3"
                     android:scaleType="fitXY"
+                    android:visibility="invisible"
                     app:srcCompat="@drawable/ic_liked" />
             </LinearLayout>
         </LinearLayout>
@@ -131,9 +137,9 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:scaleType="centerCrop"
-                app:srcCompat="@android:drawable/sym_def_app_icon"
                 android:contentDescription="@string/restaurant_picture"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/background_image"
                 tools:ignore="NestedWeights" />
         </LinearLayout>
 

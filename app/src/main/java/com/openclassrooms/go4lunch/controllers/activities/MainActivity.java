@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -28,14 +29,21 @@ import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.api.UserHelper;
-import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;
+import com.openclassrooms.go4lunch.api.UserHelper;
+import com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment;
+import com.openclassrooms.go4lunch.models.User;
+import com.openclassrooms.go4lunch.places.PlacesPresenter;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -43,7 +51,9 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+import static android.graphics.Color.WHITE;
+
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, RestaurantsListFragment.FragmentListener {
 
     //FOR DESIGN
     @BindView(R.id.main_activity_linear_layout)
@@ -51,11 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView drawerUsername;
 
+    public static GoogleApiClient mGoogleApiClient;
+
     //FOR DATA
     private static final int RC_SIGN_IN = 123;
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
     private User currentUser;
+
+    private ViewPagerAdapter adapter;
 
     private DrawerLayout mDrawerLayout;
     private TabLayout tabLayout;
@@ -73,6 +87,17 @@ public class MainActivity extends AppCompatActivity {
         this.setContentView(R.layout.activity_main);
         ButterKnife.bind(this); //Configure Butterknife
 
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .addApi(LocationServices.API)
+                .enableAutoManage(this, this)
+                .build();
+
+        //noinspection unused
+        GeoDataClient mGeoDataClient = Places.getGeoDataClient(this);
+
         AuthUI.getInstance();
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
@@ -88,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                             signOutUserFromFirebase();
                             break;
                         case R.id.nav_lunch:
+
                             break;
                         case R.id.nav_settings:
                             break;
@@ -112,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
             tabLayout = findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(viewPager);
             setupTabsStyle(tabLayout, viewPager);
-
 
             /* final ArrayAdapterSearchView searchView = (ArrayAdapterSearchView)searchItem.getActionView();
             searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -141,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     } */
 
+    @SuppressWarnings("SameReturnValue")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -258,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
     private void configureToolbar(){
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitleTextColor(android.graphics.Color.WHITE);
+        toolbar.setTitleTextColor(WHITE);
 
         ActionBar actionbar = getSupportActionBar();
         assert actionbar != null;
@@ -358,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
     // --------------------
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.MapFragment(), "Map View");
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment(), "List View");
         viewPager.setAdapter(adapter);
@@ -372,6 +398,7 @@ public class MainActivity extends AppCompatActivity {
         Objects.requireNonNull(tabLayout.getTabAt(1)).setText("List View");
 
         Objects.requireNonNull(Objects.requireNonNull(tabLayout.getTabAt(tabLayout.getSelectedTabPosition())).getIcon()).setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
+
 
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager) {
             @Override
@@ -395,4 +422,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d("Connection", "Connection failed");
+    }
+
+    @Override
+    public void onCreationComplete() {
+        RestaurantsListFragment mRestaurantListFragment = (RestaurantsListFragment) adapter.getItem(1);
+        @SuppressWarnings("unused") PlacesPresenter mPresenter = new PlacesPresenter(mRestaurantListFragment);
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        Log.d("PointerCapture", "Pointer capture changed");
+    }
 }

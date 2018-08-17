@@ -1,6 +1,6 @@
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fragment_main_swipe_container"
+    android:id="@+id/fragment_restaurant_list_swipe_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="?android:attr/actionBarSize"
@@ -9,7 +9,7 @@
 
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/fragment_main_recycler_view"
+        android:id="@+id/fragment_restaurant_list_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="?android:attr/actionBarSize"
