@@ -33,11 +33,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;
 import com.openclassrooms.go4lunch.api.UserHelper;
@@ -45,7 +48,11 @@ import com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.places.PlacesPresenter;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -74,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DrawerLayout mDrawerLayout;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+
+    private Place selected_place;
 
     // --Commented out by Inspection (10/07/2018 13:42):private Menu menu;
 
@@ -113,7 +122,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             signOutUserFromFirebase();
                             break;
                         case R.id.nav_lunch:
-
+                            Date date = Calendar.getInstance().getTime();
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                            String mDate = format.format(date);
+                            Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(getCurrentUser()).getUid()).collection("dates").document(mDate).get();
+                            final Boolean[] bool = new Boolean[1];
+                            doc.addOnCompleteListener(task -> {
+                                bool[0] = doc.getResult().exists();
+                                if(bool[0]){
+                                    DocumentSnapshot document = task.getResult();
+                                    String resId = document.getString("uid");
+                                    Places.GeoDataApi.getPlaceById(mGoogleApiClient, resId)
+                                            .setResultCallback(places -> {
+                                                if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                                                    selected_place = places.get(0);
+                                                    Intent intent = new Intent(this, DetailActivity.class);
+                                                    Bundle bundle = new Bundle();
+                                                    if (selected_place.getId() != null ) bundle.putString("place_id", selected_place.getId());
+                                                    if (selected_place.getWebsiteUri() != null )bundle.putString("place_website", selected_place.getWebsiteUri().toString());
+                                                    if (selected_place.getName() != null )bundle.putString("place_name", selected_place.getName().toString());
+                                                    if (selected_place.getPhoneNumber() != null )bundle.putString("place_phone", selected_place.getPhoneNumber().toString());
+                                                    if (selected_place.getAddress() != null )bundle.putString("place_address", selected_place.getAddress().toString());
+                                                    if (selected_place.getPlaceTypes() != null )bundle.putString("place_type", selected_place.getPlaceTypes().toString());
+                                                    intent.putExtras(bundle);
+                                                    startActivity(intent);
+                                                }
+                                            });
+                                }
+                                else {
+                                    Toast.makeText(this, "No restaurant has been chosen yet", Toast.LENGTH_LONG).show();
+                                }
+                            });
                             break;
                         case R.id.nav_settings:
                             break;
