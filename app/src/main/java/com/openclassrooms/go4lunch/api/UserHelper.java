@@ -4,7 +4,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class UserHelper {
 
@@ -35,6 +41,24 @@ public class UserHelper {
 
     public static Task<Void> deleteUser(String uid) {
         return UserHelper.getUsersCollection().document(uid).delete();
+    }
+
+    // --- CHOOSE FUNCTION ---
+
+    public static void chooseRestaurant(String uid, String id){
+        Restaurant restaurantToCreate = new Restaurant(id);
+        Date date = Calendar.getInstance().getTime();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String mDate = format.format(date);
+        UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).set(restaurantToCreate);
+    }
+
+    public static void unchooseRestaurant(String uid){
+        Date date = Calendar.getInstance().getTime();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String mDate = format.format(date);
+
+        UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).delete();
     }
 
 }
