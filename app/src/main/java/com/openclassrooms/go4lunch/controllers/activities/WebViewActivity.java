@@ -1,5 +1,6 @@
 package com.openclassrooms.go4lunch.controllers.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import com.openclassrooms.go4lunch.R;
  */
 public class WebViewActivity extends Activity {
 
+    @SuppressLint("SetJavaScriptEnabled")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
