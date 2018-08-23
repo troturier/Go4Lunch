@@ -158,7 +158,7 @@ public class DetailActivity extends AppCompatActivity {
             startActivity(intent);
         }
         else{
-            Snackbar.make(view, "No website found for this restaurant", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(view, R.string.no_website, Snackbar.LENGTH_LONG).show();
         }
     }
 

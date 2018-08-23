@@ -426,6 +426,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.MapFragment(), "Map View");
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment(), "List View");
+        adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment(), "Workmates");
         viewPager.setAdapter(adapter);
     }
 
@@ -435,6 +436,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         Objects.requireNonNull(tabLayout.getTabAt(1)).setIcon(R.drawable.ic_view_list);
         Objects.requireNonNull(tabLayout.getTabAt(1)).setText("List View");
+
+        Objects.requireNonNull(tabLayout.getTabAt(2)).setIcon(R.drawable.ic_workmates);
+        Objects.requireNonNull(tabLayout.getTabAt(2)).setText("Workmates");
 
         Objects.requireNonNull(Objects.requireNonNull(tabLayout.getTabAt(tabLayout.getSelectedTabPosition())).getIcon()).setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
 
