@@ -20,6 +20,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.PlacePhotoMetadata;
 import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
 import com.google.android.gms.location.places.PlacePhotoMetadataResult;
@@ -94,7 +95,7 @@ public class DetailActivity extends AppCompatActivity {
                     }
                 }
 
-                mUserAdapter = new UserAdapter(getApplicationContext(), mUsers);
+                mUserAdapter = new UserAdapter(getApplicationContext(), mUsers, Glide.with(this));
                 recyclerView.setAdapter(mUserAdapter);
             }
         });
@@ -168,7 +169,7 @@ public class DetailActivity extends AppCompatActivity {
         startActivity(callIntent);
     }
 
-    public void likeRestaurant(){
+    public void likeRestaurant(View view){
         CheckBox cb_like = findViewById(R.id.detail_cb_like);
 
         if(cb_like.isChecked()){

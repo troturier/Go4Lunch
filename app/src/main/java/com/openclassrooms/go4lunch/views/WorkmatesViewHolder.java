@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -44,6 +45,11 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder{
     public void updateWithResult(User user, RequestManager glide) {
 
         this.glide = glide;
+        if(user.getUrlPicture() != null){
+            glide.load(user.getUrlPicture())
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(workmateIv);
+        }
 
         String[] username = user.getUsername().split(" ");
 

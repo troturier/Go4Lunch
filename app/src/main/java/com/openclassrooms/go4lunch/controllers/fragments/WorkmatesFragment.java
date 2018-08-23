@@ -3,6 +3,7 @@ package com.openclassrooms.go4lunch.controllers.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.Task;
@@ -68,7 +71,7 @@ public class WorkmatesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         final List<User> mUsers = new ArrayList<>();
 
@@ -92,7 +95,9 @@ public class WorkmatesFragment extends Fragment {
                     //}
                 }
 
-                mWorkmatesAdapter = new WorkmatesAdapter(getContext(), mUsers);
+                RequestManager glide;
+
+                mWorkmatesAdapter = new WorkmatesAdapter(getContext(), mUsers, Glide.with(this));
                 recyclerView.setAdapter(mWorkmatesAdapter);
                 this.configureOnClickRecyclerView();
             }

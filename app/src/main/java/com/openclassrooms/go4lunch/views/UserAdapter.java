@@ -18,9 +18,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
     private List<User> mUsers = Collections.emptyList();
     private static RequestManager glide;
 
-    public UserAdapter(final Context context, final List<User> users){
+    public UserAdapter(final Context context, final List<User> users, RequestManager glide){
         mUsers = users;
-        // UserAdapter.glide = glide;
+        UserAdapter.glide = glide;
     }
 
     public final void setUsers(final List<User> users){ mUsers = users; }
@@ -36,7 +36,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
     @Override public final void onBindViewHolder(final UserViewHolder holder, final int position) {
 
         final User user = mUsers.get(position);
-        holder.updateWithResult(user, this.glide);
+        holder.updateWithResult(user, glide);
 
     }
 
