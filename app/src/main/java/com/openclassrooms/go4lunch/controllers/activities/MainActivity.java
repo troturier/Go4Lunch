@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                             });
                                 }
                                 else {
-                                    Toast.makeText(this, "No restaurant has been chosen yet", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "No restaurant has been chosen yet", Toast.LENGTH_LONG).show();
                                 }
                             });
                             break;

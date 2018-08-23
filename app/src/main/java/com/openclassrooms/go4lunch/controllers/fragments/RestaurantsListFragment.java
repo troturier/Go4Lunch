@@ -85,9 +85,6 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
         mCallback.onCreationComplete();
     }
 
-    /**
-     * Load the URL of an article in the WebView activity
-     */
     private void configureOnClickRecyclerView(){
         ItemClickSupport.addTo(recyclerView, R.layout.fragment_restaurants_list_item)
                 .setOnItemClickListener((recyclerView, position, v) -> {
@@ -105,8 +102,6 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
 
                 });
     }
-
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
