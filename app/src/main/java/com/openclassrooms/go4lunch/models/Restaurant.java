@@ -8,6 +8,8 @@ public class Restaurant {
         this.uid = uid;
     }
 
+    public Restaurant() {}
+
     public String getUid() {
         return uid;
     }
