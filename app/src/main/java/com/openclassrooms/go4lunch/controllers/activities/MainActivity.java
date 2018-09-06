@@ -382,7 +382,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 .setAvailableProviders(
                                         Arrays.asList(
                                                 new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                                new AuthUI.IdpConfig.FacebookBuilder().build()))
+                                                new AuthUI.IdpConfig.FacebookBuilder().build(),
+                                                new AuthUI.IdpConfig.EmailBuilder().build()))
                                 .setIsSmartLockEnabled(false, true)
                                 .setLogo(R.drawable.ic_logo)
                                 .build(),
