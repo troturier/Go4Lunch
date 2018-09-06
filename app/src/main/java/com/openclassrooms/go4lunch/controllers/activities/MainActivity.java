@@ -82,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
+    public static int currentTab;
+
     private Place selected_place;
 
     // --Commented out by Inspection (10/07/2018 13:42):private Menu menu;
@@ -448,6 +450,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
+                currentTab = tab.getPosition();
                 if (tab.getIcon() != null) {
                     tab.getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
                 }
