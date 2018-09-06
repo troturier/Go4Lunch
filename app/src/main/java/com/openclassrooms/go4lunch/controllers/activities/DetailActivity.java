@@ -37,7 +37,7 @@ import com.openclassrooms.go4lunch.api.RestaurantHelper;
 import com.openclassrooms.go4lunch.api.UserHelper;
 import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
-import com.openclassrooms.go4lunch.views.UserAdapter;
+import com.openclassrooms.go4lunch.adapters.UserAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -169,7 +169,7 @@ public class DetailActivity extends AppCompatActivity {
         startActivity(callIntent);
     }
 
-    public void likeRestaurant(View view){
+    public void likeRestaurant(){
         CheckBox cb_like = findViewById(R.id.detail_cb_like);
 
         if(cb_like.isChecked()){

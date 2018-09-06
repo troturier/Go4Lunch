@@ -23,4 +23,5 @@
     <string name="place_address_type">%1$s - %2$s</string>
     <string name="someone_hasn_t_decided_yet">Someone hasn\'t decided yet</string>
     <string name="no_website">No website found for this restaurant</string>
+    <string name="open">Currently open</string>
 </resources>

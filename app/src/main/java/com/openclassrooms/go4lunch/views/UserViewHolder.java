@@ -27,16 +27,12 @@ public class UserViewHolder extends RecyclerView.ViewHolder{
     @BindView(R.id.detail_list_imageview_profile)
     ImageView detailIv;
 
-    private RequestManager glide;
-
-    UserViewHolder(View itemView){
+    public UserViewHolder(View itemView){
         super(itemView);
         ButterKnife.bind(this, itemView);
     }
 
     public void updateWithResult(User user, RequestManager glide) {
-
-        this.glide = glide;
 
         DocumentReference path = UserHelper.getUsersCollection().document(user.getUid());
 

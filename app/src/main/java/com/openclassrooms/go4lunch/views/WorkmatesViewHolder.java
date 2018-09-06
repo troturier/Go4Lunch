@@ -34,17 +34,14 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder{
     TextView name;
     @BindView(R.id.workmates_list_imageview_profile)
     ImageView workmateIv;
-
-    private RequestManager glide;
-
-    WorkmatesViewHolder(View itemView){
+    
+    public WorkmatesViewHolder(View itemView){
         super(itemView);
         ButterKnife.bind(this, itemView);
     }
 
     public void updateWithResult(User user, RequestManager glide) {
 
-        this.glide = glide;
         if(user.getUrlPicture() != null){
             glide.load(user.getUrlPicture())
                     .apply(RequestOptions.circleCropTransform())

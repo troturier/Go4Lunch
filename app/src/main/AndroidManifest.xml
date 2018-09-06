@@ -59,6 +59,10 @@
             android:label="@string/title_activity_detail"
             android:theme="@style/DetailActivityTheme"/>
         <activity android:name=".controllers.activities.WebViewActivity" />
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 
 </manifest>

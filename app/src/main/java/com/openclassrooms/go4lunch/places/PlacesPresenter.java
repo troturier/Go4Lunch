@@ -39,24 +39,24 @@ import java.util.List;
 public class PlacesPresenter implements PlacesContract.Presenter {
 
 
-  private final PlacesContract.View mPlacesView;
-  private Point mDeviceLocation = null;
+    private final PlacesContract.View mPlacesView;
+    private Point mDeviceLocation = null;
 
-  private LocationService mLocationService;
-  private final static int MAX_RESULT_COUNT = 30;
-  private final static String GEOCODE_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+    private LocationService mLocationService;
+    private final static int MAX_RESULT_COUNT = 30;
+    private final static String GEOCODE_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
 
-  public PlacesPresenter(@NonNull PlacesContract.View listView){
-    mPlacesView = listView;
-    mPlacesView.setPresenter(this);
-  }
+    public PlacesPresenter(@NonNull PlacesContract.View listView){
+        mPlacesView = listView;
+        mPlacesView.setPresenter(this);
+    }
 
-  /**
-   * Place presenter starts by using the device
-   * location as the initial parameter in the
-   * geocode search.
-   */
-  @Override public final void start() {
+    /**
+    * Place presenter starts by using the device
+    * location as the initial parameter in the
+    * geocode search.
+    */
+    @Override public final void start() {
     mPlacesView.showProgressIndicator("Finding places...");
     mLocationService = LocationService.getInstance();
     List<Place> existingPlaces = mLocationService.getPlacesFromRepo();
@@ -69,22 +69,22 @@ public class PlacesPresenter implements PlacesContract.Presenter {
           // On locator task load error
               () -> mPlacesView.showMessage("The locator task was unable to load"));
     }
-  }
+    }
 
 
-  /**
-   * Delegates the display of places to the view
-   * @param places List<Place> items
-   */
-  @Override public final void setPlacesNearby(List<Place> places) {
+    /**
+    * Delegates the display of places to the view
+    * @param places List<Place> items
+    */
+    @Override public final void setPlacesNearby(List<Place> places) {
     mPlacesView.showNearbyPlaces(places);
-  }
+    }
 
-  @Override public final void setLocation(Location location) {
+    @Override public final void setLocation(Location location) {
     mDeviceLocation = new Point(location.getLongitude(), location.getLatitude());
-  }
+    }
 
-  @Override public final void getPlacesNearby() {
+    @Override public final void getPlacesNearby() {
     if (mDeviceLocation != null) {
       GeocodeParameters parameters = new GeocodeParameters();
       parameters.setMaxResults(MAX_RESULT_COUNT);
@@ -96,10 +96,10 @@ public class PlacesPresenter implements PlacesContract.Presenter {
         setPlacesNearby(data);
       });
     }
-  }
+    }
 
-  @Override public final Envelope getExtentForNearbyPlaces() {
+    @Override public final Envelope getExtentForNearbyPlaces() {
     return mLocationService != null ? mLocationService.getResultEnvelope(): null;
-  }
+    }
 
 }

@@ -1,7 +1,7 @@
 package com.openclassrooms.go4lunch.controllers.fragments;
 
-import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -13,10 +13,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -26,7 +26,7 @@ import com.openclassrooms.go4lunch.api.UserHelper;
 import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.ItemClickSupport;
-import com.openclassrooms.go4lunch.views.WorkmatesAdapter;
+import com.openclassrooms.go4lunch.adapters.WorkmatesAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,19 +56,14 @@ public class WorkmatesFragment extends Fragment {
     }
 
 
-    public static WorkmatesFragment newInstance() {
-        WorkmatesFragment fragment = new WorkmatesFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-
-    }
+// --Commented out by Inspection START (06/09/18 10:59):
+//    public static WorkmatesFragment newInstance() {
+//        WorkmatesFragment fragment = new WorkmatesFragment();
+//        Bundle args = new Bundle();
+//        fragment.setArguments(args);
+//        return fragment;
+//    }
+// --Commented out by Inspection STOP (06/09/18 10:59)
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,18 +83,47 @@ public class WorkmatesFragment extends Fragment {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     User user = document.toObject(User.class);
-                    //String currentUid = Objects.requireNonNull(getCurrentUser()).getUid();
+                    String currentUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
                     String newUid = user.getUid();
-                    //if(!newUid.equals(currentUid)) {
-                    mUsers.add(user);
-                    //}
+                    if(!newUid.equals(currentUid)) {
+                        mUsers.add(user);
+                    }
                 }
 
-                RequestManager glide;
+                List<User> usersWithRestaurant = new ArrayList<>();
+                List<User> usersWithoutRestaurant = new ArrayList<>();
 
-                mWorkmatesAdapter = new WorkmatesAdapter(getContext(), mUsers, Glide.with(this));
-                recyclerView.setAdapter(mWorkmatesAdapter);
-                this.configureOnClickRecyclerView();
+                for (User user : mUsers) {
+                    Date date = Calendar.getInstance().getTime();
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    String mDate = format.format(date);
+                    Task<DocumentSnapshot> doc2 = UserHelper.getUsersCollection().document(Objects.requireNonNull(user.getUid())).collection("dates").document(mDate).get();
+                    final Boolean[] bool = new Boolean[1];
+                    doc2.addOnCompleteListener(task2 -> {
+                        bool[0] = doc2.getResult().exists();
+                        if (bool[0]) {
+                            usersWithRestaurant.add(0, user);
+                        } else {
+                            usersWithoutRestaurant.add(user);
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            usersWithRestaurant.sort((user1, t1) -> user1.getUsername().compareToIgnoreCase(t1.getUsername()));
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            usersWithoutRestaurant.sort((user12, t1) -> user12.getUsername().compareToIgnoreCase(t1.getUsername()));
+                        }
+
+                        mUsers.clear();
+                        mUsers.addAll(usersWithRestaurant);
+                        mUsers.addAll(usersWithoutRestaurant);
+
+                        mWorkmatesAdapter = new WorkmatesAdapter(mUsers, Glide.with(this));
+                        recyclerView.setAdapter(mWorkmatesAdapter);
+                        this.configureOnClickRecyclerView();
+                    });
+                }
             }
         });
 
@@ -151,13 +175,4 @@ public class WorkmatesFragment extends Fragment {
                 });
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
 }

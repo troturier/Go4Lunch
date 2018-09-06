@@ -1,13 +1,13 @@
 package com.openclassrooms.go4lunch.controllers.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -31,7 +32,7 @@ import com.openclassrooms.go4lunch.data.Place;
 import com.openclassrooms.go4lunch.places.PlacesContract;
 import com.openclassrooms.go4lunch.utils.GetPlacesData;
 import com.openclassrooms.go4lunch.utils.ItemClickSupport;
-import com.openclassrooms.go4lunch.views.PlacesAdapter;
+import com.openclassrooms.go4lunch.adapters.PlacesAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
 
     private PlacesAdapter mPlaceAdapter;
 
-    private ProgressDialog mProgressDialog;
+    private Snackbar mSnackbar;
 
     private Boolean listLoaded;
 
@@ -81,7 +82,7 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
         placeList = new ArrayList<>();
 
         @SuppressWarnings("unused") GeoDataClient mGeoDataClient = Places.getGeoDataClient(Objects.requireNonNull(getContext()));
-        mPlaceAdapter = new PlacesAdapter(getContext(), placeList, Glide.with(this), this);
+        mPlaceAdapter = new PlacesAdapter(placeList, Glide.with(this), this);
         mCallback.onCreationComplete();
     }
 
@@ -154,7 +155,7 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
                         placeList = newPlacesList;
                         mPlaceAdapter.setPlaces(placeList, listId, listOpenNow);
                         mPlaceAdapter.notifyDataSetChanged();
-                        mProgressDialog.dismiss();
+                        mSnackbar.dismiss();
                     }
                 }).execute(dataTransfer);
             }
@@ -163,12 +164,12 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
 
 
     @Override public void showProgressIndicator(final String message) {
-        if (mProgressDialog == null){
-            mProgressDialog = new ProgressDialog(getActivity());
-        }
-        mProgressDialog.dismiss();
-        mProgressDialog.setMessage(message);
-        mProgressDialog.show();
+        SwipeRefreshLayout sRefreshLayout = Objects.requireNonNull(getView()).findViewById(R.id.fragment_restaurant_list_swipe_container);
+        mSnackbar = Snackbar.make(sRefreshLayout, message, Snackbar.LENGTH_INDEFINITE);
+        ViewGroup contentLay = (ViewGroup) mSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text).getParent();
+        ProgressBar item = new ProgressBar(getContext());
+        contentLay.addView(item,0);
+        mSnackbar.show();
     }
 
 

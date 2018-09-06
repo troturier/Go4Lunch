@@ -15,6 +15,7 @@
       <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.data.LocationService.RouteSolver mCallback" />
       <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.data.LocationService.RouteSolver origin" />
       <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.models.User urlPicture" />
+      <entry_point TYPE="field" FQNAME="com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment mSnackbar" />
     </entry_points>
     <list size="1">
       <item index="0" class="java.lang.String" itemvalue="android.support.annotation.Nullable" />
@@ -49,6 +50,14 @@
     <pattern value="com.openclassrooms.go4lunch.data.Place" method="compareTo" />
     <pattern value="com.openclassrooms.go4lunch.models.User" method="setUrlPicture" />
     <pattern value="com.openclassrooms.go4lunch.places.PlacesContract.Presenter" method="getExtentForNearbyPlaces" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" method="getUser" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" method="setUsers" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" method="UserAdapter" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" method="getItemCount" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" method="getItemViewType" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" method="onBindViewHolder" />
+    <pattern value="com.openclassrooms.go4lunch.adapters.UserAdapter" method="onCreateViewHolder" />
   </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="android.support.annotation.Nullable" />
