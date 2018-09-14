@@ -34,11 +34,13 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
 import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
+import com.openclassrooms.go4lunch.utils.MyApp;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +49,8 @@ import java.util.Objects;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
+
+import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -96,7 +100,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                 .build();
 
         mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(getActivity(), mGoogleApiClient,
-                LAT_LNG_BOUNDS, typeFilter);
+                LAT_LNG_BOUNDS, typeFilter, mGoogleMap);
 
         mSearchText.setAdapter(mPlaceAutocompleteAdapter);
 
@@ -113,6 +117,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
             return false;
         });
     }
+
+
 
     private void geoLocate(){
         Log.d("GeoLocate", "geoLocate: geolocating");
@@ -132,7 +138,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                     moveCamera(new LatLng(address.getLatitude(), address.getLongitude()));
                     break;
                 case 1:
-                    Toast.makeText(getActivity(), "Current tab is list view", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MyApp.getContext(), "Current tab is list view", Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -145,7 +151,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MapFragment.DEFAULT_ZOOM));
     }
 
-    @AfterPermissionGranted(RC_LOCATION)
+    //@AfterPermissionGranted(RC_LOCATION)
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_map, container, false);

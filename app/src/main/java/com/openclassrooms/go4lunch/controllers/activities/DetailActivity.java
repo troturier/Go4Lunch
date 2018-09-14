@@ -169,7 +169,7 @@ public class DetailActivity extends AppCompatActivity {
         startActivity(callIntent);
     }
 
-    public void likeRestaurant(){
+    public void likeRestaurant(View view){
         CheckBox cb_like = findViewById(R.id.detail_cb_like);
 
         if(cb_like.isChecked()){

@@ -2,6 +2,8 @@ package com.openclassrooms.go4lunch.adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.location.Address;
+import android.location.Geocoder;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -21,9 +23,16 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.openclassrooms.go4lunch.R;
+import com.openclassrooms.go4lunch.utils.MyApp;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,6 +60,8 @@ public class PlaceAutocompleteAdapter
      */
     private LatLngBounds mBounds;
 
+    private GoogleMap mGoogleMap;
+
     /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
      */
@@ -62,9 +73,10 @@ public class PlaceAutocompleteAdapter
      * @see android.widget.ArrayAdapter#ArrayAdapter(android.content.Context, int)
      */
     public PlaceAutocompleteAdapter(Context context, GoogleApiClient googleApiClient,
-                                    LatLngBounds bounds, AutocompleteFilter filter) {
+                                    LatLngBounds bounds, AutocompleteFilter filter, GoogleMap googleMap) {
         super(context, android.R.layout.simple_expandable_list_item_2, android.R.id.text1);
         mGoogleApiClient = googleApiClient;
+        mGoogleMap = googleMap;
         mBounds = bounds;
         mPlaceFilter = filter;
     }
@@ -106,6 +118,17 @@ public class PlaceAutocompleteAdapter
         TextView textView2 = (TextView) row.findViewById(android.R.id.text2);
         textView1.setText(item.getPrimaryText(STYLE_BOLD));
         textView2.setText(item.getSecondaryText(STYLE_BOLD));
+
+        MarkerOptions markerOptions = new MarkerOptions();
+
+        markerOptions.position(getLocationFromAddress(MyApp.getContext(), item.getFullText(STYLE_BOLD).toString()));
+
+        markerOptions.title(item.getFullText(STYLE_BOLD).toString());
+        markerOptions.snippet(item.getPlaceId());
+
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
+
+        mGoogleMap.addMarker(markerOptions);
 
         return row;
     }
@@ -217,5 +240,31 @@ public class PlaceAutocompleteAdapter
         return null;
     }
 
+    public LatLng getLocationFromAddress(Context context, String strAddress)
+    {
+        Geocoder coder= new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try
+        {
+            address = coder.getFromLocationName(strAddress, 5);
+            if(address==null)
+            {
+                return null;
+            }
+            Address location = address.get(0);
+            location.getLatitude();
+            location.getLongitude();
+
+            p1 = new LatLng(location.getLatitude(), location.getLongitude());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return p1;
+
+    }
 
 }
