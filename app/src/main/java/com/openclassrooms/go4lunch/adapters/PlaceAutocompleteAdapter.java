@@ -23,13 +23,12 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.utils.MyApp;
+import com.openclassrooms.go4lunch.utils.GetAppContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +59,6 @@ public class PlaceAutocompleteAdapter
      */
     private LatLngBounds mBounds;
 
-    private GoogleMap mGoogleMap;
-
     /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
      */
@@ -73,10 +70,9 @@ public class PlaceAutocompleteAdapter
      * @see android.widget.ArrayAdapter#ArrayAdapter(android.content.Context, int)
      */
     public PlaceAutocompleteAdapter(Context context, GoogleApiClient googleApiClient,
-                                    LatLngBounds bounds, AutocompleteFilter filter, GoogleMap googleMap) {
+                                    LatLngBounds bounds, AutocompleteFilter filter) {
         super(context, android.R.layout.simple_expandable_list_item_2, android.R.id.text1);
         mGoogleApiClient = googleApiClient;
-        mGoogleMap = googleMap;
         mBounds = bounds;
         mPlaceFilter = filter;
     }
@@ -121,14 +117,12 @@ public class PlaceAutocompleteAdapter
 
         MarkerOptions markerOptions = new MarkerOptions();
 
-        markerOptions.position(getLocationFromAddress(MyApp.getContext(), item.getFullText(STYLE_BOLD).toString()));
+        markerOptions.position(getLocationFromAddress(GetAppContext.getContext(), item.getFullText(STYLE_BOLD).toString()));
 
         markerOptions.title(item.getFullText(STYLE_BOLD).toString());
         markerOptions.snippet(item.getPlaceId());
 
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
-
-        mGoogleMap.addMarker(markerOptions);
 
         return row;
     }

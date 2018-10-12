@@ -1,14 +1,18 @@
 package com.openclassrooms.go4lunch.controllers.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,17 +26,22 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
-import com.openclassrooms.go4lunch.data.LocationService;
-import com.openclassrooms.go4lunch.data.Place;
-import com.openclassrooms.go4lunch.places.PlacesContract;
-import com.openclassrooms.go4lunch.utils.GetPlacesData;
-import com.openclassrooms.go4lunch.utils.ItemClickSupport;
 import com.openclassrooms.go4lunch.adapters.PlacesAdapter;
+import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
+import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
+import com.openclassrooms.go4lunch.models.Restaurant;
+import com.openclassrooms.go4lunch.utils.GetAppContext;
+import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
+import com.openclassrooms.go4lunch.utils.ItemClickSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +50,9 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RestaurantsListFragment extends Fragment implements PlacesContract.View, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PlacesAdapter.Listener{
+import static android.graphics.Color.RED;
+
+public class RestaurantsListFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PlacesAdapter.Listener{
 
     // FOR DESIGN
     @BindView(R.id.fragment_restaurant_list_recycler_view)
@@ -51,17 +62,17 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
 
     private FragmentListener mCallback;
 
-    public static GoogleApiClient mGoogleApiClient;
+    public static GoogleApiClient mGoogleApiClient = MainActivity.mGoogleApiClient;
 
-    private PlacesContract.Presenter mPresenter = null;
-
-    private PlacesAdapter mPlaceAdapter;
+    public static PlacesAdapter mPlaceAdapter;
 
     private Snackbar mSnackbar;
 
+    private List<Restaurant> restaurantList;
+
     private Boolean listLoaded;
 
-    private List<Place> placeList;
+    public List<Restaurant> placeList;
 
     public RestaurantsListFragment() {
         // Required empty public constructor
@@ -69,7 +80,6 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
 
     public static  RestaurantsListFragment newInstance(){
         return new RestaurantsListFragment();
-
     }
 
     @Override
@@ -89,17 +99,23 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
     private void configureOnClickRecyclerView(){
         ItemClickSupport.addTo(recyclerView, R.layout.fragment_restaurants_list_item)
                 .setOnItemClickListener((recyclerView, position, v) -> {
-                    Intent intent = new Intent(getActivity(), DetailActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("place_id", mPlaceAdapter.getPlaceId(position));
-                    bundle.putString("place_website", Objects.requireNonNull(mPlaceAdapter.getPlace(position).getURL()));
-                    bundle.putString("place_name", mPlaceAdapter.getPlace(position).getName());
-                    bundle.putString("place_phone", Objects.requireNonNull(mPlaceAdapter.getPlace(position).getPhone()));
-                    bundle.putString("place_address", Objects.requireNonNull(mPlaceAdapter.getPlace(position).getAddress()));
-                    bundle.putString("place_type", Objects.requireNonNull(mPlaceAdapter.getPlace(position).getType()));
+                    Places.GeoDataApi.getPlaceById(mGoogleApiClient, mPlaceAdapter.getPlaceId(position))
+                            .setResultCallback(places -> {
+                                if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                                    Intent intent = new Intent(getActivity(), DetailActivity.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("place_id", places.get(0).getId());
+                                    bundle.putString("place_website", Objects.requireNonNull(places.get(0).getWebsiteUri().toString()));
+                                    bundle.putString("place_name", places.get(0).getName().toString());
+                                    bundle.putString("place_phone", Objects.requireNonNull(places.get(0).getPhoneNumber().toString()));
+                                    bundle.putString("place_address", Objects.requireNonNull(places.get(0).getAddress().toString()));
 
-                    intent.putExtras(bundle);
-                    startActivity(intent);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                }
+                                places.release();
+                            });
+
 
                 });
     }
@@ -123,47 +139,13 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
 
         this.configureOnClickRecyclerView();
 
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(MyBroadCastReceiver,
+                new IntentFilter("com.action.test"));
+
         return mPlacesView;
     }
 
-    @Override public final void showNearbyPlaces(final List<Place> places) {
-        if (places.isEmpty()) {
-            showMessage("No places found");
-        } else {
-            List<Place> newPlacesList = new ArrayList<>();
-            List<String> listId = new ArrayList<>();
-            List<Boolean> listOpenNow = new ArrayList<>();
-
-            for (int i = 0; i < places.size(); i++) {
-
-                String url = getUrlId(places.get(i));
-                final String[] id = {null};
-                Object dataTransfer[] = new Object[2];
-
-                dataTransfer[0] = id[0];
-                dataTransfer[1] = url;
-
-                int finalI = i;
-                new GetPlacesData((output, openNow) -> {
-                    Log.d("PLACE_ID", "ID = " + output);
-                    if (output != null && !Objects.requireNonNull(places.get(finalI).getType()).contains("Bakery") && !Objects.requireNonNull(places.get(finalI).getType()).contains("Winery")) {
-                        newPlacesList.add(places.get(finalI));
-                        listId.add(output);
-                        listOpenNow.add(openNow);
-                    }
-                    if (finalI == places.size() - 1) {
-                        placeList = newPlacesList;
-                        mPlaceAdapter.setPlaces(placeList, listId, listOpenNow);
-                        mPlaceAdapter.notifyDataSetChanged();
-                        mSnackbar.dismiss();
-                    }
-                }).execute(dataTransfer);
-            }
-        }
-    }
-
-
-    @Override public void showProgressIndicator(final String message) {
+    public void showProgressIndicator(final String message) {
         SwipeRefreshLayout sRefreshLayout = Objects.requireNonNull(getView()).findViewById(R.id.fragment_restaurant_list_swipe_container);
         mSnackbar = Snackbar.make(sRefreshLayout, message, Snackbar.LENGTH_INDEFINITE);
         ViewGroup contentLay = (ViewGroup) mSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text).getParent();
@@ -173,7 +155,6 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
     }
 
 
-    @Override
     public void showMessage(final String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
@@ -182,19 +163,6 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e("fragment", "Google Places API connection failed with error code: " + connectionResult.getErrorCode());
         Toast.makeText(getActivity(), "Google Places API connection failed with error code:" + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
-    }
-
-    @Override public final void setPresenter(final PlacesContract.Presenter presenter) {
-        mPresenter = presenter;
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(Objects.requireNonNull(getActivity()))
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .addApi(Places.GEO_DATA_API)
-                    .build();
-        }
     }
 
     @Override public final void onStart() {
@@ -215,10 +183,6 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
                     mGoogleApiClient);
             if (mLastLocation != null) {
                 Log.i("Places", "Latitude/longitude from Google Location Services " + mLastLocation.getLatitude() + "/" + mLastLocation.getLongitude());
-                mPresenter.setLocation(mLastLocation);
-                final LocationService locationService = LocationService.getInstance();
-                locationService.setCurrentLocation(mLastLocation);
-                mPresenter.start();
                 listLoaded = true;
             }
         }
@@ -251,41 +215,14 @@ public class RestaurantsListFragment extends Fragment implements PlacesContract.
         void onCreationComplete();
     }
 
-    private String getUrlId(Place place)
+    private final BroadcastReceiver MyBroadCastReceiver = new BroadcastReceiver()
     {
-
-        String location = Objects.requireNonNull(place.getLocation()).toString();
-
-        Log.d("ResFragment", place.getLocation().toString());
-
-        String[] splitStringArray = location.split("-");
-        String[] splitStringArray2 = splitStringArray[1].split(",");
-
-        String lng;
-        String lat;
-
-        if(splitStringArray[1].contains(".")){
-            lng = "-" + splitStringArray2[0];
-
-            lat = splitStringArray2[1];
-            lat = lat.trim();
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            restaurantList = GetNearbyPlacesData.restaurantList;
+            mPlaceAdapter.setPlaces(restaurantList);
+            mPlaceAdapter.notifyDataSetChanged();
         }
-        else {
-            lng = "-" + splitStringArray2[0] + "." + splitStringArray2[1];
-
-            lat = splitStringArray2[2] + "." + splitStringArray2[3];
-            lat = lat.trim();
-        }
-
-        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlaceUrl.append("location=").append(lat).append(",").append(lng);
-        googlePlaceUrl.append("&rankby=distance");
-        String name = place.getName().replace(" ", "+");
-        googlePlaceUrl.append("&name=").append(name);
-        googlePlaceUrl.append("&key=").append("AIzaSyCzm8EvYTPjQukPostLLKxVzheqwDc1Q9o");
-
-        Log.d("ResFragment", googlePlaceUrl.toString());
-
-        return googlePlaceUrl.toString();
-    }
+    };
 }

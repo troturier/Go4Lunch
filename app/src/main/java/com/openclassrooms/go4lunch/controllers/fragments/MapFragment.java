@@ -30,27 +30,34 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
 import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
+import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
+import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
-import com.openclassrooms.go4lunch.utils.MyApp;
+import com.openclassrooms.go4lunch.utils.GetAppContext;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
-import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
-
-import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -77,7 +84,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
     private static final float DEFAULT_ZOOM = 17f;
 
-
     private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -168), new LatLng(71, 136));
 
@@ -100,7 +106,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                 .build();
 
         mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(getActivity(), mGoogleApiClient,
-                LAT_LNG_BOUNDS, typeFilter, mGoogleMap);
+                LAT_LNG_BOUNDS, typeFilter);
 
         mSearchText.setAdapter(mPlaceAutocompleteAdapter);
 
@@ -118,7 +124,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         });
     }
 
-
+    public void addMarkerToMMap(MarkerOptions markerOptions){
+        mGoogleMap.addMarker(markerOptions);
+    }
 
     private void geoLocate(){
         Log.d("GeoLocate", "geoLocate: geolocating");
@@ -138,7 +146,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                     moveCamera(new LatLng(address.getLatitude(), address.getLongitude()));
                     break;
                 case 1:
-                    Toast.makeText(MyApp.getContext(), "Current tab is list view", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GetAppContext.getContext(), "Current tab is list view", Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -247,21 +255,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                                             latitude = location2.getLatitude();
                                             longitude = location2.getLongitude();
 
+                                            Integer tabRequest = 1;
+
                                             // -------------- RESTAURANT ------------------- //
 
                                             String restaurant = "restaurant";
 
                                             String url = getUrl(latitude, longitude, restaurant);
 
-                                            Object dataTransfer[] = new Object[2];
+                                            Object dataTransfer[] = new Object[5];
 
                                             dataTransfer[0] = mGoogleMap;
                                             dataTransfer[1] = url;
+                                            dataTransfer[2] = tabRequest;
+                                            dataTransfer[3] = latitude;
+                                            dataTransfer[4] = longitude;
 
                                             GetNearbyPlacesData getNearbyPlacesData1 = new GetNearbyPlacesData();
 
                                             getNearbyPlacesData1.execute(dataTransfer);
-
 
                                             // -------------- MEAL TAKEAWAY ------------------- //
 
@@ -269,10 +281,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
                                             url = getUrl(latitude, longitude, meal_takeaway);
 
-                                            Object dataTransfer2[] = new Object[2];
+                                            Object dataTransfer2[] = new Object[5];
 
                                             dataTransfer2[0] = mGoogleMap;
                                             dataTransfer2[1] = url;
+                                            dataTransfer2[2] = tabRequest;
+                                            dataTransfer2[3] = latitude;
+                                            dataTransfer2[4] = longitude;
 
                                             GetNearbyPlacesData getNearbyPlacesData2 = new GetNearbyPlacesData();
 
@@ -283,10 +298,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
                                             url = getUrl(latitude, longitude, meal_delivery);
 
-                                            Object dataTransfer3[] = new Object[2];
+                                            Object dataTransfer3[] = new Object[5];
 
                                             dataTransfer3[0] = mGoogleMap;
                                             dataTransfer3[1] = url;
+                                            dataTransfer3[2] = tabRequest;
+                                            dataTransfer3[3] = latitude;
+                                            dataTransfer3[4] = longitude;
 
                                             GetNearbyPlacesData getNearbyPlacesData3 = new GetNearbyPlacesData();
 
@@ -301,6 +319,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                     RC_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.INTERNET);
         }
     }
+
+    public static void setMarkerIcon(Restaurant restaurant){
+        Date date = Calendar.getInstance().getTime();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String mDate = format.format(date);
+
+        Task<QuerySnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(restaurant.getId()).collection("dates").document(mDate).collection("users").get();
+        doc.addOnCompleteListener(task -> {
+            if (task.getResult().size() > 0) {
+                restaurant.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_green));
+            } else {
+                restaurant.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(GetNearbyPlacesData.restaurantList != null) {
+            List<Restaurant> restaurantList = GetNearbyPlacesData.restaurantList;
+            for (int i = 0; i < restaurantList.size(); i++) {
+                setMarkerIcon(restaurantList.get(i));
+            }
+        }
+    }
+
 
     @SuppressLint("MissingPermission")
     @Override
@@ -319,7 +364,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         EasyPermissions.requestPermissions(this, getString(R.string.rational_string), 456, perms);
     }
 
-    private String getUrl(double latitude , double longitude , String nearbyPlace)
+    public String getUrl(double latitude, double longitude, String nearbyPlace)
     {
 
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");

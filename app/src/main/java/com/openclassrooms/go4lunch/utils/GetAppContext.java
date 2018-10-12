@@ -3,10 +3,10 @@ package com.openclassrooms.go4lunch.utils;
 import android.app.Application;
 import android.content.Context;
 
-public class MyApp extends Application {
-    private static MyApp instance;
+public class GetAppContext extends Application {
+    private static GetAppContext instance;
 
-    public static MyApp getInstance() {
+    public static GetAppContext getInstance() {
         return instance;
     }
 

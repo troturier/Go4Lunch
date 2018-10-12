@@ -1,6 +1,5 @@
 package com.openclassrooms.go4lunch.utils;
 
-import java.util.HashMap;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -8,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,8 +21,10 @@ public class DataParser {
         String vicinity= "--NA--";
         String latitude;
         String longitude;
+        Boolean opening;
         String reference;
         String id="";
+        String rating="";
 
         Log.d("DataParser","jsonobject ="+googlePlaceJson.toString());
 
@@ -37,9 +39,14 @@ public class DataParser {
             if(!googlePlaceJson.isNull("place_id")) {
                 id = googlePlaceJson.getString("place_id");
             }
+            if(!googlePlaceJson.isNull("rating")) {
+                rating = googlePlaceJson.getString("rating");
+            }
 
             latitude = googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lat");
             longitude = googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lng");
+
+            opening = googlePlaceJson.getJSONObject("opening_hours").getBoolean("open_now");
 
             reference = googlePlaceJson.getString("reference");
 
@@ -49,6 +56,8 @@ public class DataParser {
             googlePlaceMap.put("lng", longitude);
             googlePlaceMap.put("reference", reference);
             googlePlaceMap.put("id", id);
+            googlePlaceMap.put("opening", opening.toString());
+            googlePlaceMap.put("rating", rating);
 
 
         }

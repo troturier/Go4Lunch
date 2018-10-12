@@ -6,8 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.RequestManager;
+import com.google.android.gms.location.places.Place;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.data.Place;
+import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.views.RestaurantViewHolder;
 
 import java.util.Collections;
@@ -15,10 +16,11 @@ import java.util.List;
 
 public class PlacesAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
-    private List<Place> mPlaces;
+    private List<Restaurant> mPlaces;
     private List<String> listId = Collections.emptyList();
     private List<Boolean> listOpenNow = Collections.emptyList();
     private final RequestManager glide;
+
 
     public interface Listener {
 
@@ -27,16 +29,14 @@ public class PlacesAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
     // FOR COMMUNICATION
     private final Listener callback;
 
-    public PlacesAdapter(final List<Place> places, RequestManager glide, Listener callback){
-        mPlaces = places;
+    public PlacesAdapter(final List<Restaurant> places, RequestManager glide, Listener callback){
+        this.mPlaces = places;
         this.glide = glide;
         this.callback = callback;
     }
 
-    public final void setPlaces(final List<Place> places, List<String> ids, List<Boolean> listOpen){
+    public final void setPlaces(final List<Restaurant> places){
         mPlaces = places;
-        listId = ids;
-        listOpenNow = listOpen;
     }
 
     @Override public final RestaurantViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
@@ -47,12 +47,12 @@ public class PlacesAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
 
     @Override public final void onBindViewHolder(final RestaurantViewHolder holder, final int position) {
-        final Place place = mPlaces.get(position);
-        holder.updateWithResult(place, listId.get(position), listOpenNow.get(position), this.glide);
+        final Restaurant place = mPlaces.get(position);
+        holder.updateWithResult(place, this.glide);
     }
 
     public String getPlaceId(int position){
-        return listId.get(position);
+        return mPlaces.get(position).getId();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class PlacesAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
         return mPlaces.size();
     }
 
-    public Place getPlace(int position){
+    public Restaurant getPlace(int position){
         return this.mPlaces.get(position);
     }
 

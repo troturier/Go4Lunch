@@ -1,43 +1,33 @@
 package com.openclassrooms.go4lunch.controllers.activities;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.location.places.PlacePhotoMetadata;
-import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
-import com.google.android.gms.location.places.PlacePhotoMetadataResult;
-import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.api.RestaurantHelper;
-import com.openclassrooms.go4lunch.api.UserHelper;
-import com.openclassrooms.go4lunch.models.Restaurant;
-import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.adapters.UserAdapter;
+import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
+import com.openclassrooms.go4lunch.models.User;
+import com.openclassrooms.go4lunch.utils.GetPlacesData;
+import com.openclassrooms.go4lunch.utils.GetAppContext;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,8 +37,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import static com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment.mGoogleApiClient;
+import static com.openclassrooms.go4lunch.helpers.UserHelper.getCurrentUser;
 
+/**
+ * Class relating to the "Detail" activity of a place
+ */
 public class DetailActivity extends AppCompatActivity {
 
     private String url;
@@ -68,21 +61,25 @@ public class DetailActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        // -------- USER LIST ---------
-
+        // Creating a list which will be used to retrieve users who chose this location
         final List<User> mUsers = new ArrayList<>();
 
+        // Retrieving the current date
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);
 
+        // Retrieving the place id
         id = intent.getStringExtra("place_id");
 
+        // Configuration of the RecyclerView that will be used for the user list
         recyclerView = findViewById(R.id.detail_list_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Path for the database to the chosen place
         CollectionReference path = RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users");
 
+        // Retrieving the list of users who chose this restaurant and calling the corresponding adapter
         Task<QuerySnapshot> doc = path.get();
         doc.addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -90,6 +87,7 @@ public class DetailActivity extends AppCompatActivity {
                     User user = document.toObject(User.class);
                     String currentUid = Objects.requireNonNull(getCurrentUser()).getUid();
                     String newUid = user.getUid();
+                    // Filtering the list to not include the current user
                     if(!newUid.equals(currentUid)) {
                         mUsers.add(user);
                     }
@@ -100,56 +98,65 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
-
-
-        // ----------------------------
-
+        // Set the place name in the corresponding TextView
         TextView place_name = findViewById(R.id.detail_name);
         place_name.setText(intent.getStringExtra("place_name"));
 
+        // Retrieving place address TextView holder
         TextView place_address = findViewById(R.id.detail_address);
 
+        // Retrieving place address from the intents
         String address = intent.getStringExtra("place_address");
 
-        String type = intent.getStringExtra("place_type");
-
+        // Splitting the place address to only get the short version of it (Street and number)
         String[] splitStringArray = address.split(",");
 
-        if(type.contains("[")){
-            place_address.setText(splitStringArray[0]);
-        }
-        else{
-            place_address.setText(getString(R.string.place_address_type, type, splitStringArray[0]));
-        }
+        // Setting it in the corresponding TextView
+        place_address.setText(splitStringArray[0]);
 
+        // ImageView holder for the place picture
         ImageView imageView = findViewById(R.id.detail_photo);
+        // Retrieving the place picture and loading it into the ImageView
+        GetPlacesData.getPhotos(id, imageView, Glide.with(this));
 
-        getPhotos(id, imageView);
-
+        // Retrieving place website url from the intents
         url = intent.getStringExtra("place_website");
+
+        // Retrieving place phone number from the intents
         phone_number = intent.getStringExtra("place_phone");
 
-        restaurantSelected = false;
+        // Setting a default value for the restaurantSelected boolean
+        this.restaurantSelected = false;
 
+        // Retrieving the floating action button
         fab = findViewById(R.id.fab);
 
+        // Configuring the different actions of the button
         fab.setOnClickListener(v -> {
-            if(!restaurantSelected){
+            if(!this.restaurantSelected){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    createRestaurantInFireStoreForChoose();
+                    this.restaurantSelected = RestaurantHelper.createRestaurantInFireStoreForChoose(id);
+                    fab.setImageDrawable(GetAppContext.getContext().getDrawable(R.drawable.ic_restaurant_selected));
                 }
             }
             else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    deleteRestaurantInFireStoreForChoose();
+                    this.restaurantSelected = RestaurantHelper.deleteRestaurantInFireStoreForChoose(id);
+                    fab.setImageDrawable(GetAppContext.getContext().getDrawable(R.drawable.ic_restaurant_not_selected));
                 }
             }
         });
 
-        checkIfDocumentExistsForLike(Objects.requireNonNull(getCurrentUser()).getUid(), id);
-        checkIfDocumentExistsForChosen(getCurrentUser().getUid(), id);
+        // Updating the value of the Boolean variable restaurantSelected according to the database
+        RestaurantHelper.checkIfDocumentExistsForLike(Objects.requireNonNull(getCurrentUser()).getUid(), id, findViewById(R.id.detail_cb_like));
+        checkIfDocumentExistsForChosen(getCurrentUser().getUid(), id, fab);
+
     }
 
+    /**
+     * Open the place website in the WebViewActivity
+     * @param view WebViewActivity
+     */
     public void openWebsite(@SuppressWarnings("unused") View view){
         if(!url.isEmpty()) {
             Intent intent = new Intent(this, WebViewActivity.class);
@@ -163,142 +170,40 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Open the calling app of the device with the place phone number
+     * @param view A calling app
+     */
     public void openCallingApp(@SuppressWarnings("unused") View view){
         Intent callIntent  = new Intent(Intent.ACTION_DIAL);
         callIntent.setData(Uri.parse("tel:"+phone_number));
         startActivity(callIntent);
     }
 
+    /**
+     * Function called when the "Like" button is pressed
+     * Calls the corresponding helper functions to update place data in the database
+     * @param view View
+     */
     public void likeRestaurant(View view){
         CheckBox cb_like = findViewById(R.id.detail_cb_like);
 
         if(cb_like.isChecked()){
-            deleteRestaurantInFireStoreForLike();
+            RestaurantHelper.deleteRestaurantInFireStoreForLike(id);
             cb_like.setChecked(false);
         }
         else{
-            createRestaurantInFireStoreForLike();
+            RestaurantHelper.createRestaurantInFireStoreForLike(id);
             cb_like.setChecked(true);
         }
     }
 
-    private static void getPhotos(String id, ImageView iv) {
-        new AsyncTask<Void,Void,Void>(){
-            Bitmap image;
-            Boolean exist = false;
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                PlacePhotoMetadataResult result = Places.GeoDataApi.getPlacePhotos(mGoogleApiClient, id).await();
-                if (result.getStatus().isSuccess()) {
-                    PlacePhotoMetadataBuffer photoMetadataBuffer = result.getPhotoMetadata();
-                    if (photoMetadataBuffer.getCount() > 0) {
-                        PlacePhotoMetadata photo = photoMetadataBuffer.get(0);
-                        image = photo.getPhoto(mGoogleApiClient).await()
-                                .getBitmap();
-
-                        Log.d("Bitmap", String.valueOf(image));
-                        exist = true;
-                    }
-                    photoMetadataBuffer.release();
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                if (exist) {
-                    iv.setImageBitmap(image);
-                    super.onPostExecute(aVoid);
-                }
-            }
-        }.execute();
-    }
-
-    // --------------------------------
-    // REST
-    // --------------------------------
-
-    @Nullable
-    private FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
-
-    // --- LIKE FUNCTION ---
-
-    private void createRestaurantInFireStoreForLike(){
-        if (!checkIfRestaurantExists(id)){
-            RestaurantHelper.createRestaurant(id);
-            if(this.getCurrentUser() != null)
-                RestaurantHelper.likeRestaurant(this.getCurrentUser().getUid(), id);
-        }
-        else {
-            if(this.getCurrentUser() != null)
-                RestaurantHelper.likeRestaurant(this.getCurrentUser().getUid(), id);
-        }
-    }
-
-    private void deleteRestaurantInFireStoreForLike(){
-        if (checkIfRestaurantExists(id)){
-            RestaurantHelper.deleteRestaurant(id);
-        }
-        if(this.getCurrentUser() != null)
-            RestaurantHelper.dislikeRestaurant(this.getCurrentUser().getUid(), id);
-    }
-
-    private void checkIfDocumentExistsForLike(String uid, String id){
-        Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("likes").document(uid).get();
-        final Boolean[] bool = new Boolean[1];
-        doc.addOnCompleteListener(task -> {
-            bool[0] = doc.getResult().exists();
-            if(bool[0]){
-                CheckBox cb_like = findViewById(R.id.detail_cb_like);
-                cb_like.setChecked(true);
-            }
-        });
-    }
-
-    // --- CHOOSE FUNCTION ---
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void createRestaurantInFireStoreForChoose(){
-        if (!checkIfRestaurantExists(id)){
-            RestaurantHelper.createRestaurant(id);
-            if(this.getCurrentUser() != null) {
-                checkIfUserDocumentExistsForChosen(this.getCurrentUser().getUid(), id);
-                fab.setImageDrawable(getDrawable(R.drawable.ic_restaurant_selected));
-                restaurantSelected = true;
-            }
-        }
-        else {
-            if(this.getCurrentUser() != null) {
-                checkIfUserDocumentExistsForChosen(this.getCurrentUser().getUid(), id);
-                fab.setImageDrawable(getDrawable(R.drawable.ic_restaurant_selected));
-                restaurantSelected = true;
-            }
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void deleteRestaurantInFireStoreForChoose(){
-        if (checkIfRestaurantExists(id)){
-            RestaurantHelper.deleteRestaurant(id);
-            fab.setImageDrawable(getDrawable(R.drawable.ic_restaurant_not_selected));
-            restaurantSelected = false;
-        }
-        if(this.getCurrentUser() != null) {
-            RestaurantHelper.unchooseRestaurant(this.getCurrentUser().getUid(), id);
-            UserHelper.unchooseRestaurant(this.getCurrentUser().getUid());
-            fab.setImageDrawable(getDrawable(R.drawable.ic_restaurant_not_selected));
-            restaurantSelected = false;
-        }
-    }
-
-
-    private void checkIfDocumentExistsForChosen(String uid, String id){
+    public void checkIfDocumentExistsForChosen(String uid, String id, FloatingActionButton fab){
 
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);
+        final Boolean[] resSelected = {false};
 
         Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").document(uid).get();
         final Boolean[] bool = new Boolean[1];
@@ -306,43 +211,10 @@ public class DetailActivity extends AppCompatActivity {
             bool[0] = doc.getResult().exists();
             if(bool[0]){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    fab.setImageDrawable(getDrawable(R.drawable.ic_restaurant_selected));
-                    restaurantSelected = true;
+                    fab.setImageDrawable(GetAppContext.getContext().getDrawable(R.drawable.ic_restaurant_selected));
+                    restaurantSelected = resSelected[0] = true;
                 }
             }
         });
     }
-
-    private void checkIfUserDocumentExistsForChosen(String uid, String id){
-
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
-
-        Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).get();
-        final Boolean[] bool = new Boolean[1];
-        doc.addOnCompleteListener(task -> {
-            bool[0] = doc.getResult().exists();
-            if(bool[0]){
-                DocumentSnapshot document = task.getResult();
-                Restaurant restaurant = document.toObject(Restaurant.class);
-                RestaurantHelper.unchooseRestaurant(uid, Objects.requireNonNull(restaurant).getUid());
-                RestaurantHelper.chooseRestaurant(uid, id);
-                UserHelper.chooseRestaurant(uid, id);
-            }
-            else{
-                RestaurantHelper.chooseRestaurant(uid, id);
-                UserHelper.chooseRestaurant(uid, id);
-            }
-        });
-    }
-
-    private Boolean checkIfRestaurantExists(String id){
-        Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).get();
-        final Boolean[] bool2 = new Boolean[1];
-        bool2[0] = false;
-        doc.addOnCompleteListener(task -> bool2[0] = doc.getResult().exists());
-        return bool2[0];
-    }
-
 }

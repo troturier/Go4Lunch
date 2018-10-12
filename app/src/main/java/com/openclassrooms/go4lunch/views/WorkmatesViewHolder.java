@@ -13,7 +13,7 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.api.UserHelper;
+import com.openclassrooms.go4lunch.helpers.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
 
 import java.text.SimpleDateFormat;

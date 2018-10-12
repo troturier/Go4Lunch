@@ -33,8 +33,6 @@ public class PlaceDataParser {
                 openNow = opening_hours.getBoolean("open_now");
             }
 
-
-
             googlePlaceMap.put("id", id);
             googlePlaceMap.put("open_now", String.valueOf(openNow));
         }

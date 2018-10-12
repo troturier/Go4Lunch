@@ -43,10 +43,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;
-import com.openclassrooms.go4lunch.api.UserHelper;
 import com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment;
+import com.openclassrooms.go4lunch.helpers.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
-import com.openclassrooms.go4lunch.places.PlacesPresenter;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -431,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment(), "List View");
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment(), "Workmates");
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(3);
     }
 
     private void setupTabsStyle(TabLayout tabLayout, ViewPager viewPager) {
@@ -477,7 +477,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public void onCreationComplete() {
         RestaurantsListFragment mRestaurantListFragment = (RestaurantsListFragment) adapter.getItem(1);
-        @SuppressWarnings("unused") PlacesPresenter mPresenter = new PlacesPresenter(mRestaurantListFragment);
     }
 
     @Override
