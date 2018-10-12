@@ -1,6 +1,10 @@
-package com.openclassrooms.go4lunch.api;
+package com.openclassrooms.go4lunch.helpers;
+
+import android.support.annotation.Nullable;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -36,6 +40,9 @@ public class UserHelper {
     public static Task<DocumentSnapshot> getUser(String uid){
         return UserHelper.getUsersCollection().document(uid).get();
     }
+
+    @Nullable
+    public static FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
 
     // --- DELETE ---
 
