@@ -1,6 +1,7 @@
 package com.openclassrooms.go4lunch.utils;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -16,6 +17,8 @@ import com.openclassrooms.go4lunch.models.Restaurant;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -23,8 +26,9 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
     private String googlePlacesData;
     private GoogleMap mMap;
-    private Float latitude;
-    private Float longitude;
+    private double latitude;
+    private double longitude;
+    private Integer tabrequest;
     public static List<Restaurant> restaurantList;
     @SuppressWarnings("FieldCanBeLocal")
     private String url;
@@ -33,7 +37,9 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
     protected String doInBackground(Object... objects){
         mMap = (GoogleMap)objects[0];
         url = (String)objects[1];
-
+        tabrequest = (Integer)objects[2];
+        latitude = (double)objects[3];
+        longitude = (double)objects[4];
         DownloadURL downloadURL = new DownloadURL();
         try {
             googlePlacesData = downloadURL.readUrl(url);
@@ -53,10 +59,19 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
         Log.d("nearbyplacesdata","called parse method");
         showNearbyPlaces(nearbyPlaceList);
 
-        Intent intent = new Intent("com.action.test");
-        intent.putExtra("key","123");
-        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(GetAppContext.getContext());
-        manager.sendBroadcast(intent);
+        if(tabrequest == 3) {
+            Collections.sort(restaurantList, new Comparator<Restaurant>() {
+                @Override
+                public int compare(Restaurant o1, Restaurant o2) {
+                    return o1.getDistance().compareTo(o2.getDistance());
+                }
+            });
+
+            Intent intent = new Intent("com.action.test");
+            intent.putExtra("key", "123");
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(GetAppContext.getContext());
+            manager.sendBroadcast(intent);
+        }
     }
 
     private void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList)
@@ -88,6 +103,18 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
                     restaurant.setOpen(Boolean.parseBoolean(googlePlace.get("opening")));
                     restaurant.setRating(Float.parseFloat(googlePlace.get("rating")));
                     restaurant.setMarker(marker);
+
+                    Location locationA = new Location("point A");
+
+                    locationA.setLatitude(latitude);
+                    locationA.setLongitude(longitude);
+
+                    Location locationB = new Location("point B");
+
+                    locationB.setLatitude(lat);
+                    locationB.setLongitude(lng);
+
+                    restaurant.setDistance(locationA.distanceTo(locationB));
 
                     MapFragment.setMarkerIcon(restaurant);
 

@@ -300,6 +300,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
                                             Object dataTransfer3[] = new Object[5];
 
+                                            tabRequest = 3;
+
                                             dataTransfer3[0] = mGoogleMap;
                                             dataTransfer3[1] = url;
                                             dataTransfer3[2] = tabRequest;

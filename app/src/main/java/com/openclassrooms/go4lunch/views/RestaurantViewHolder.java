@@ -62,7 +62,17 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
         String[] splitStringArray = addressString.toString().split(",");
         address.setText(splitStringArray[0]);
 
-        // distance.setText(String.format("%dm", place.getDistance()));
+        String dist;
+        int distInt = Math.round(place.getDistance());
+
+        if(place.getDistance() > 1000){
+            dist = Integer.toString(distInt/1000);
+            distance.setText(String.format("%skm", dist));
+        }
+        else {
+            dist = Integer.toString(distInt);
+            distance.setText(String.format("%sm", dist));
+        }
 
         if(place.getOpen()){
         opening.setText(R.string.open);
