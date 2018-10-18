@@ -18,6 +18,12 @@
         <item name="android:fitsSystemWindows">true</item>
     </style>
 
+    <style name="TabCustomTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
     <!-- STYLE SIGN-IN ACTIVITY -->
     <style name="LoginTheme" parent="AppTheme">
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -43,47 +49,6 @@
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:title">false</item>
-    </style>
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
-        <item name="queryBackground">@android:color/white</item>
-        <item name="commitIcon">@drawable/places_ic_search</item>
-        <item name="queryHint">"Search restaurants"</item>
-        <item name="closeIcon">@drawable/ic_close</item>
-        <item name="android:textColorHint">@android:color/black</item>
-        <item name="android:textColor">@android:color/black</item>
-        <item name="android:editTextColor">@android:color/black</item>
-    </style>
-
-    <style name="CustomDialog" parent="@android:style/Theme.Holo.Dialog">
-        <item name="android:windowMinWidthMajor">100%</item>
-        <item name="android:windowMinWidthMinor">100%</item>
-        <item name="android:background">#323232</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:alertDialogStyle">@style/customDialogStyle</item>
-        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
-    </style>
-
-    <style name="customDialogStyle">
-        <item name="android:bottomBright">@android:color/transparent</item>
-        <item name="android:bottomDark">@android:color/transparent</item>
-        <item name="android:bottomMedium">@android:color/transparent</item>
-        <item name="android:centerBright">@android:color/transparent</item>
-        <item name="android:centerDark">@android:color/transparent</item>
-        <item name="android:centerMedium">@android:color/transparent</item>
-        <item name="android:fullBright">@android:color/transparent</item>
-        <item name="android:fullDark">@android:color/transparent</item>
-        <item name="android:topBright">@android:color/transparent</item>
-        <item name="android:topDark">@android:color/transparent</item>
-    </style>
-
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/slide_in</item>
-        <item name="android:windowExitAnimation">@anim/slide_out</item>
     </style>
 
 </resources>

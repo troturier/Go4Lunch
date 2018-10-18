@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_restaurant_list_item_ll"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
@@ -30,21 +29,22 @@
                 android:paddingBottom="5dp"
                 android:text="@string/res_list_name"
                 android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/res_list_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="5dp"
-                android:text="@string/res_list_address" />
+                android:text="@string/res_list_address"
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/res_list_opening"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/res_list_opening"
+                android:textSize="13sp"
                 android:textStyle="italic" />
         </LinearLayout>
 

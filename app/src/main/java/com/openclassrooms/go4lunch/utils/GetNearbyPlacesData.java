@@ -29,7 +29,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
     private double latitude;
     private double longitude;
     private Integer tabrequest;
-    public static List<Restaurant> restaurantList;
+    public static List<Restaurant> restaurantListData;
     @SuppressWarnings("FieldCanBeLocal")
     private String url;
 
@@ -58,9 +58,8 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
         nearbyPlaceList = parser.parse(s);
         Log.d("nearbyplacesdata","called parse method");
         showNearbyPlaces(nearbyPlaceList);
-
         if(tabrequest == 3) {
-            Collections.sort(restaurantList, new Comparator<Restaurant>() {
+            Collections.sort(restaurantListData, new Comparator<Restaurant>() {
                 @Override
                 public int compare(Restaurant o1, Restaurant o2) {
                     return o1.getDistance().compareTo(o2.getDistance());
@@ -76,7 +75,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
     private void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList)
     {
-        restaurantList = new ArrayList<>();
+        restaurantListData = new ArrayList<>();
         for (int i = 0; i < nearbyPlaceList.size(); i++) {
             HashMap<String, String> googlePlace = nearbyPlaceList.get(i);
             if(!googlePlace.isEmpty()){
@@ -118,7 +117,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
                     MapFragment.setMarkerIcon(restaurant);
 
-                    restaurantList.add(restaurant);
+                    restaurantListData.add(restaurant);
                 }
 
             }

@@ -7,18 +7,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.utils.GetPlacesData;
 
+import java.text.DecimalFormat;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.graphics.Color.RED;
-import static com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment.mGoogleApiClient;
 
 public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
@@ -63,19 +62,23 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
         address.setText(splitStringArray[0]);
 
         String dist;
-        int distInt = Math.round(place.getDistance());
+        Float distFloat = place.getDistance();
 
         if(place.getDistance() > 1000){
-            dist = Integer.toString(distInt/1000);
+            distFloat = distFloat/1000;
+            DecimalFormat decForm = new DecimalFormat("#.#");
+            Double distDouble = Double.valueOf(decForm.format(distFloat));
+            dist = Double.toString(distDouble);
             distance.setText(String.format("%skm", dist));
         }
         else {
+            int distInt = Math.round(distFloat);
             dist = Integer.toString(distInt);
             distance.setText(String.format("%sm", dist));
         }
 
         if(place.getOpen()){
-        opening.setText(R.string.open);
+            opening.setText(R.string.open);
         }
         else {
             opening.setText(R.string.closed);
@@ -93,5 +96,4 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             }
         }
     }
-
 }

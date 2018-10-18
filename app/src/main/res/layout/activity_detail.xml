@@ -16,7 +16,6 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
@@ -93,7 +92,6 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/detail_call"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -106,7 +104,6 @@
                 android:textColor="@color/colorPrimary" />
 
             <Button
-                android:id="@+id/detail_like"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -119,7 +116,6 @@
                 android:textColor="@color/colorPrimary" />
 
             <Button
-                android:id="@+id/detail_website"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

@@ -1,9 +1,7 @@
 package com.openclassrooms.go4lunch.helpers;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -16,10 +14,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
-import com.openclassrooms.go4lunch.utils.GetAppContext;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -38,11 +34,12 @@ public class RestaurantHelper {
 
     // --- CREATE ---
 
-    public static void createRestaurant(String id) {
+    private static void createRestaurant(String id) {
         Restaurant restaurantToCreate = new Restaurant(id);
         RestaurantHelper.getRestaurantsCollection().document(id).set(restaurantToCreate);
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean createRestaurantInFireStoreForChoose(String id){
         if (!checkIfRestaurantExists(id)){
             RestaurantHelper.createRestaurant(id);
@@ -72,10 +69,11 @@ public class RestaurantHelper {
 
     // --- DELETE ---
 
-    public static void deleteRestaurant(String id) {
+    private static void deleteRestaurant(String id) {
         RestaurantHelper.getRestaurantsCollection().document(id).delete();
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean deleteRestaurantInFireStoreForChoose(String id){
         if (checkIfRestaurantExists(id)){
             RestaurantHelper.deleteRestaurant(id);
@@ -97,18 +95,18 @@ public class RestaurantHelper {
 
     // --- LIKE FUNCTION ---
 
-    public static void likeRestaurant(String uid, String id){
+    private static void likeRestaurant(String uid, String id){
         User userToCreate = new User(uid);
         RestaurantHelper.getRestaurantsCollection().document(id).collection("likes").document(uid).set(userToCreate);
     }
 
-    public static void dislikeRestaurant(String uid, String id){
+    private static void dislikeRestaurant(String uid, String id){
         RestaurantHelper.getRestaurantsCollection().document(id).collection("likes").document(uid).delete();
     }
 
     // --- CHOOSE FUNCTION ---
 
-    public static void chooseRestaurant(String uid, String id){
+    private static void chooseRestaurant(String uid, String id){
         User userToCreate = new User(uid, Objects.requireNonNull(getCurrentUser()).getDisplayName());
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -117,7 +115,7 @@ public class RestaurantHelper {
         RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").document(uid).set(userToCreate);
     }
 
-    public static void unchooseRestaurant(String uid, String id){
+    private static void unchooseRestaurant(String uid, String id){
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);
@@ -129,7 +127,7 @@ public class RestaurantHelper {
 
 
 
-    public static void checkIfUserDocumentExistsForChosen(String uid, String id){
+    private static void checkIfUserDocumentExistsForChosen(String uid, String id){
 
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -138,11 +136,11 @@ public class RestaurantHelper {
         Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).get();
         final Boolean[] bool = new Boolean[1];
         doc.addOnCompleteListener(task -> {
-            bool[0] = doc.getResult().exists();
+            bool[0] = Objects.requireNonNull(doc.getResult()).exists();
             if(bool[0]){
                 DocumentSnapshot document = task.getResult();
-                Restaurant restaurant = document.toObject(Restaurant.class);
-                RestaurantHelper.unchooseRestaurant(uid, restaurant.getId());
+                Restaurant restaurant = Objects.requireNonNull(document).toObject(Restaurant.class);
+                RestaurantHelper.unchooseRestaurant(uid, Objects.requireNonNull(restaurant).getId());
                 RestaurantHelper.chooseRestaurant(uid, id);
                 UserHelper.chooseRestaurant(uid, id);
             }
@@ -153,11 +151,11 @@ public class RestaurantHelper {
         });
     }
 
-    public static Boolean checkIfRestaurantExists(String id){
+    private static Boolean checkIfRestaurantExists(String id){
         Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).get();
         final Boolean[] bool2 = new Boolean[1];
         bool2[0] = false;
-        doc.addOnCompleteListener(task -> bool2[0] = doc.getResult().exists());
+        doc.addOnCompleteListener(task -> bool2[0] = Objects.requireNonNull(doc.getResult()).exists());
         return bool2[0];
     }
 
@@ -165,7 +163,7 @@ public class RestaurantHelper {
         Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("likes").document(uid).get();
         final Boolean[] bool = new Boolean[1];
         doc.addOnCompleteListener(task -> {
-            bool[0] = doc.getResult().exists();
+            bool[0] = Objects.requireNonNull(doc.getResult()).exists();
             if(bool[0]){
                 cb_like.setChecked(true);
             }
@@ -182,10 +180,14 @@ public class RestaurantHelper {
 
         Task<QuerySnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").get();
         doc.addOnCompleteListener(task -> {
-            if (task.getResult().size() > 0){
+            if (Objects.requireNonNull(task.getResult()).size() > 0){
                 workmatesTv.setText(String.format("(%d)", task.getResult().size()));
                 workmatesTv.setVisibility(View.VISIBLE);
                 workmatesIc.setVisibility(View.VISIBLE);
+            }
+            else {
+                workmatesTv.setVisibility(View.INVISIBLE);
+                workmatesIc.setVisibility(View.INVISIBLE);
             }
         });
     }

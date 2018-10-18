@@ -35,7 +35,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -45,8 +44,8 @@ import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.Restaurant;
-import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
+import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -340,8 +339,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     @Override
     public void onResume() {
         super.onResume();
-        if(GetNearbyPlacesData.restaurantList != null) {
-            List<Restaurant> restaurantList = GetNearbyPlacesData.restaurantList;
+        if(GetNearbyPlacesData.restaurantListData != null) {
+            List<Restaurant> restaurantList = GetNearbyPlacesData.restaurantListData;
             for (int i = 0; i < restaurantList.size(); i++) {
                 setMarkerIcon(restaurantList.get(i));
             }

@@ -12,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,20 +25,14 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.adapters.PlacesAdapter;
 import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
 import com.openclassrooms.go4lunch.models.Restaurant;
-import com.openclassrooms.go4lunch.utils.GetAppContext;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 import com.openclassrooms.go4lunch.utils.ItemClickSupport;
 
@@ -49,8 +42,6 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.graphics.Color.RED;
 
 public class RestaurantsListFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PlacesAdapter.Listener{
 
@@ -68,7 +59,7 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
 
     private Snackbar mSnackbar;
 
-    private List<Restaurant> restaurantList;
+    private List<Restaurant> restaurantList = new ArrayList<>();
 
     private Boolean listLoaded;
 
@@ -202,6 +193,18 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if(GetNearbyPlacesData.restaurantListData != null && restaurantList != null) {
+            restaurantList.clear();
+            mPlaceAdapter.notifyDataSetChanged();
+            restaurantList.addAll(GetNearbyPlacesData.restaurantListData);
+            mPlaceAdapter.setPlaces(restaurantList);
+            mPlaceAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
     public void onConnectionSuspended(int i) {
         Log.i("Places", "Location connection lost, trying to re-connect");
         mGoogleApiClient.connect();
@@ -220,7 +223,7 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            restaurantList = GetNearbyPlacesData.restaurantList;
+            restaurantList.addAll(GetNearbyPlacesData.restaurantListData);
             mPlaceAdapter.setPlaces(restaurantList);
             mPlaceAdapter.notifyDataSetChanged();
         }

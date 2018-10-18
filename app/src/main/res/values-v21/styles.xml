@@ -19,12 +19,10 @@
         <item name="android:fitsSystemWindows">true</item>
     </style>
 
-    <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
-        <item name="queryBackground">@android:color/white</item>
-        <item name="commitIcon">@drawable/places_ic_search</item>
-        <item name="queryHint">"Search restaurants"</item>
-        <item name="closeIcon">@drawable/ic_close</item>
-        <item name="android:textColorHint">@android:color/black</item>
+    <style name="TabCustomTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
+
 </resources>
