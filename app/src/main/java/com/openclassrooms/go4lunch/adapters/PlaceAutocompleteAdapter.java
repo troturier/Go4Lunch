@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
+import android.support.annotation.NonNull;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -32,6 +33,7 @@ import com.openclassrooms.go4lunch.utils.GetAppContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,17 +54,17 @@ public class PlaceAutocompleteAdapter
     /**
      * Handles autocomplete requests.
      */
-    private GoogleApiClient mGoogleApiClient;
+    private final GoogleApiClient mGoogleApiClient;
 
     /**
      * The bounds used for Places Geo Data autocomplete API requests.
      */
-    private LatLngBounds mBounds;
+    private final LatLngBounds mBounds;
 
     /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
      */
-    private AutocompleteFilter mPlaceFilter;
+    private final AutocompleteFilter mPlaceFilter;
 
     /**
      * Initializes with a resource for text rows and autocomplete query bounds.
@@ -75,13 +77,6 @@ public class PlaceAutocompleteAdapter
         mGoogleApiClient = googleApiClient;
         mBounds = bounds;
         mPlaceFilter = filter;
-    }
-
-    /**
-     * Sets the bounds for all subsequent queries.
-     */
-    public void setBounds(LatLngBounds bounds) {
-        mBounds = bounds;
     }
 
     /**
@@ -100,8 +95,9 @@ public class PlaceAutocompleteAdapter
         return mResultList.get(position);
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         View row = super.getView(position, convertView, parent);
 
         // Sets the primary and secondary text for a row.
@@ -110,14 +106,14 @@ public class PlaceAutocompleteAdapter
 
         AutocompletePrediction item = getItem(position);
 
-        TextView textView1 = (TextView) row.findViewById(android.R.id.text1);
-        TextView textView2 = (TextView) row.findViewById(android.R.id.text2);
-        textView1.setText(item.getPrimaryText(STYLE_BOLD));
+        TextView textView1 = row.findViewById(android.R.id.text1);
+        TextView textView2 = row.findViewById(android.R.id.text2);
+        textView1.setText(Objects.requireNonNull(item).getPrimaryText(STYLE_BOLD));
         textView2.setText(item.getSecondaryText(STYLE_BOLD));
 
         MarkerOptions markerOptions = new MarkerOptions();
 
-        markerOptions.position(getLocationFromAddress(GetAppContext.getContext(), item.getFullText(STYLE_BOLD).toString()));
+        markerOptions.position(Objects.requireNonNull(getLocationFromAddress(GetAppContext.getContext(), item.getFullText(STYLE_BOLD).toString())));
 
         markerOptions.title(item.getFullText(STYLE_BOLD).toString());
         markerOptions.snippet(item.getPlaceId());
@@ -130,6 +126,7 @@ public class PlaceAutocompleteAdapter
     /**
      * Returns the filter for the current set of autocomplete results.
      */
+    @NonNull
     @Override
     public Filter getFilter() {
         return new Filter() {
@@ -162,6 +159,7 @@ public class PlaceAutocompleteAdapter
 
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
+                    // noinspection unchecked
                     mResultList = (ArrayList<AutocompletePrediction>) results.values;
                     notifyDataSetChanged();
                 } else {
@@ -234,7 +232,7 @@ public class PlaceAutocompleteAdapter
         return null;
     }
 
-    public LatLng getLocationFromAddress(Context context, String strAddress)
+    private LatLng getLocationFromAddress(Context context, String strAddress)
     {
         Geocoder coder= new Geocoder(context);
         List<Address> address;

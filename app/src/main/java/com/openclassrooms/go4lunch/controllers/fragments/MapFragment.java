@@ -35,7 +35,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.openclassrooms.go4lunch.R;
@@ -121,10 +120,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
             }
             return false;
         });
-    }
-
-    public void addMarkerToMMap(MarkerOptions markerOptions){
-        mGoogleMap.addMarker(markerOptions);
     }
 
     private void geoLocate(){
@@ -328,7 +323,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
         Task<QuerySnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(restaurant.getId()).collection("dates").document(mDate).collection("users").get();
         doc.addOnCompleteListener(task -> {
-            if (task.getResult().size() > 0) {
+            if (Objects.requireNonNull(task.getResult()).size() > 0) {
                 restaurant.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_green));
             } else {
                 restaurant.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));

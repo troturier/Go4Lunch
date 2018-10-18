@@ -30,7 +30,7 @@ public class GetPlacesData extends AsyncTask<Object, String, String> {
         void processFinish(String output, Boolean open);
     }
 
-    private AsyncResponse delegate = null;
+    private AsyncResponse delegate;
 
     public GetPlacesData(AsyncResponse delegate){
         this.delegate = delegate;

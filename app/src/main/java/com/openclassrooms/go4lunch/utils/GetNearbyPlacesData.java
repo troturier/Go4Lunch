@@ -18,7 +18,6 @@ import com.openclassrooms.go4lunch.models.Restaurant;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,15 +58,9 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
         Log.d("nearbyplacesdata","called parse method");
         showNearbyPlaces(nearbyPlaceList);
         if(tabrequest == 3) {
-            Collections.sort(restaurantListData, new Comparator<Restaurant>() {
-                @Override
-                public int compare(Restaurant o1, Restaurant o2) {
-                    return o1.getDistance().compareTo(o2.getDistance());
-                }
-            });
+            Collections.sort(restaurantListData, (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
 
             Intent intent = new Intent("com.action.test");
-            intent.putExtra("key", "123");
             LocalBroadcastManager manager = LocalBroadcastManager.getInstance(GetAppContext.getContext());
             manager.sendBroadcast(intent);
         }

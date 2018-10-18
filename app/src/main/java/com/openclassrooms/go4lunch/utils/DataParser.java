@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class DataParser {
+class DataParser {
 
     private HashMap<String, String> getPlace(JSONObject googlePlaceJson)
     {
@@ -85,7 +85,7 @@ public class DataParser {
         return placelist;
     }
 
-    public List<HashMap<String, String>> parse(String jsonData)
+    List<HashMap<String, String>> parse(String jsonData)
     {
         JSONArray jsonArray = null;
         JSONObject jsonObject;

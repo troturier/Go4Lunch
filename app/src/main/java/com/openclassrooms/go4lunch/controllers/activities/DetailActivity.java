@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -26,8 +25,8 @@ import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.adapters.UserAdapter;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.User;
-import com.openclassrooms.go4lunch.utils.GetPlacesData;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
+import com.openclassrooms.go4lunch.utils.GetPlacesData;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -83,7 +82,7 @@ public class DetailActivity extends AppCompatActivity {
         Task<QuerySnapshot> doc = path.get();
         doc.addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                for (QueryDocumentSnapshot document : task.getResult()) {
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                     User user = document.toObject(User.class);
                     String currentUid = Objects.requireNonNull(getCurrentUser()).getUid();
                     String newUid = user.getUid();
@@ -198,17 +197,18 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-    public void checkIfDocumentExistsForChosen(String uid, String id, FloatingActionButton fab){
+    private void checkIfDocumentExistsForChosen(String uid, String id, FloatingActionButton fab){
 
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);
+        //noinspection MismatchedReadAndWriteOfArray
         final Boolean[] resSelected = {false};
 
         Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").document(uid).get();
         final Boolean[] bool = new Boolean[1];
         doc.addOnCompleteListener(task -> {
-            bool[0] = doc.getResult().exists();
+            bool[0] = Objects.requireNonNull(doc.getResult()).exists();
             if(bool[0]){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     fab.setImageDrawable(GetAppContext.getContext().getDrawable(R.drawable.ic_restaurant_selected));

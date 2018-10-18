@@ -9,9 +9,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class DownloadURL {
+class DownloadURL {
 
-    public String readUrl(String myUrl) throws IOException
+    String readUrl(String myUrl) throws IOException
     {
         String data = "";
         InputStream inputStream = null;

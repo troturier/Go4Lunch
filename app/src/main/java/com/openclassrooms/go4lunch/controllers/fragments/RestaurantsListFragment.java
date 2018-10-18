@@ -57,8 +57,6 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
 
     public static PlacesAdapter mPlaceAdapter;
 
-    private Snackbar mSnackbar;
-
     private List<Restaurant> restaurantList = new ArrayList<>();
 
     private Boolean listLoaded;
@@ -83,32 +81,28 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
         placeList = new ArrayList<>();
 
         @SuppressWarnings("unused") GeoDataClient mGeoDataClient = Places.getGeoDataClient(Objects.requireNonNull(getContext()));
-        mPlaceAdapter = new PlacesAdapter(placeList, Glide.with(this), this);
+        mPlaceAdapter = new PlacesAdapter(placeList, Glide.with(this));
         mCallback.onCreationComplete();
     }
 
     private void configureOnClickRecyclerView(){
         ItemClickSupport.addTo(recyclerView, R.layout.fragment_restaurants_list_item)
-                .setOnItemClickListener((recyclerView, position, v) -> {
-                    Places.GeoDataApi.getPlaceById(mGoogleApiClient, mPlaceAdapter.getPlaceId(position))
-                            .setResultCallback(places -> {
-                                if (places.getStatus().isSuccess() && places.getCount() > 0) {
-                                    Intent intent = new Intent(getActivity(), DetailActivity.class);
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("place_id", places.get(0).getId());
-                                    bundle.putString("place_website", Objects.requireNonNull(places.get(0).getWebsiteUri().toString()));
-                                    bundle.putString("place_name", places.get(0).getName().toString());
-                                    bundle.putString("place_phone", Objects.requireNonNull(places.get(0).getPhoneNumber().toString()));
-                                    bundle.putString("place_address", Objects.requireNonNull(places.get(0).getAddress().toString()));
+                .setOnItemClickListener((recyclerView, position, v) -> Places.GeoDataApi.getPlaceById(mGoogleApiClient, mPlaceAdapter.getPlaceId(position))
+                        .setResultCallback(places -> {
+                            if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("place_id", places.get(0).getId());
+                                bundle.putString("place_website", Objects.requireNonNull(Objects.requireNonNull(places.get(0).getWebsiteUri()).toString()));
+                                bundle.putString("place_name", places.get(0).getName().toString());
+                                bundle.putString("place_phone", Objects.requireNonNull(Objects.requireNonNull(places.get(0).getPhoneNumber()).toString()));
+                                bundle.putString("place_address", Objects.requireNonNull(Objects.requireNonNull(places.get(0).getAddress()).toString()));
 
-                                    intent.putExtras(bundle);
-                                    startActivity(intent);
-                                }
-                                places.release();
-                            });
-
-
-                });
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                            }
+                            places.release();
+                        }));
     }
 
     @Override
@@ -130,7 +124,7 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
 
         this.configureOnClickRecyclerView();
 
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(MyBroadCastReceiver,
+        LocalBroadcastManager.getInstance(Objects.requireNonNull(getActivity())).registerReceiver(MyBroadCastReceiver,
                 new IntentFilter("com.action.test"));
 
         return mPlacesView;
@@ -138,7 +132,7 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
 
     public void showProgressIndicator(final String message) {
         SwipeRefreshLayout sRefreshLayout = Objects.requireNonNull(getView()).findViewById(R.id.fragment_restaurant_list_swipe_container);
-        mSnackbar = Snackbar.make(sRefreshLayout, message, Snackbar.LENGTH_INDEFINITE);
+        Snackbar mSnackbar = Snackbar.make(sRefreshLayout, message, Snackbar.LENGTH_INDEFINITE);
         ViewGroup contentLay = (ViewGroup) mSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text).getParent();
         ProgressBar item = new ProgressBar(getContext());
         contentLay.addView(item,0);

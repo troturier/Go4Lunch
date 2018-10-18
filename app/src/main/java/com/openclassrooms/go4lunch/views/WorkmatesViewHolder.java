@@ -56,10 +56,10 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder{
         Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(user.getUid())).collection("dates").document(mDate).get();
         final Boolean[] bool = new Boolean[1];
         doc.addOnCompleteListener(task -> {
-            bool[0] = doc.getResult().exists();
+            bool[0] = Objects.requireNonNull(doc.getResult()).exists();
             if (bool[0]) {
                 DocumentSnapshot document = task.getResult();
-                String resId = document.getString("uid");
+                String resId = Objects.requireNonNull(document).getString("uid");
                 Places.GeoDataApi.getPlaceById(mGoogleApiClient, resId)
                         .setResultCallback(places -> {
                             if (places.getStatus().isSuccess() && places.getCount() > 0) {

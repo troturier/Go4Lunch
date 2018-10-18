@@ -39,7 +39,7 @@ public class UserViewHolder extends RecyclerView.ViewHolder{
         Task<DocumentSnapshot> doc = path.get();
         doc.addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        User user2 = task.getResult().toObject(User.class);
+                        User user2 = Objects.requireNonNull(task.getResult()).toObject(User.class);
 
                         String[] username = Objects.requireNonNull(user2).getUsername().split(" ");
 

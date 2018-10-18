@@ -52,7 +52,7 @@ public class UserHelper {
 
     // --- CHOOSE FUNCTION ---
 
-    public static void chooseRestaurant(String uid, String id){
+    static void chooseRestaurant(String uid, String id){
         Restaurant restaurantToCreate = new Restaurant(id);
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -60,7 +60,7 @@ public class UserHelper {
         UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).set(restaurantToCreate);
     }
 
-    public static void unchooseRestaurant(String uid){
+    static void unchooseRestaurant(String uid){
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);

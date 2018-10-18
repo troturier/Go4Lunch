@@ -75,8 +75,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private static final int DELETE_USER_TASK = 20;
     private User currentUser;
 
-    private ViewPagerAdapter adapter;
-
     private DrawerLayout mDrawerLayout;
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -129,10 +127,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(getCurrentUser()).getUid()).collection("dates").document(mDate).get();
                             final Boolean[] bool = new Boolean[1];
                             doc.addOnCompleteListener(task -> {
-                                bool[0] = doc.getResult().exists();
+                                bool[0] = Objects.requireNonNull(doc.getResult()).exists();
                                 if(bool[0]){
                                     DocumentSnapshot document = task.getResult();
-                                    String resId = document.getString("uid");
+                                    String resId = Objects.requireNonNull(document).getString("uid");
                                     Places.GeoDataApi.getPlaceById(mGoogleApiClient, resId)
                                             .setResultCallback(places -> {
                                                 if (places.getStatus().isSuccess() && places.getCount() > 0) {
@@ -425,7 +423,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     // --------------------
 
     private void setupViewPager(ViewPager viewPager) {
-        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.MapFragment(), "Map View");
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment(), "List View");
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment(), "Workmates");
@@ -476,7 +474,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onCreationComplete() {
-        RestaurantsListFragment mRestaurantListFragment = (RestaurantsListFragment) adapter.getItem(1);
     }
 
     @Override

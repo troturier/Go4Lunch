@@ -6,19 +6,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.RequestManager;
-import com.google.android.gms.location.places.Place;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.views.RestaurantViewHolder;
 
-import java.util.Collections;
 import java.util.List;
 
 public class PlacesAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
     private List<Restaurant> mPlaces;
-    private List<String> listId = Collections.emptyList();
-    private List<Boolean> listOpenNow = Collections.emptyList();
     private final RequestManager glide;
 
 
@@ -26,13 +22,9 @@ public class PlacesAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
     }
 
-    // FOR COMMUNICATION
-    private final Listener callback;
-
-    public PlacesAdapter(final List<Restaurant> places, RequestManager glide, Listener callback){
+    public PlacesAdapter(final List<Restaurant> places, RequestManager glide){
         this.mPlaces = places;
         this.glide = glide;
-        this.callback = callback;
     }
 
     public final void setPlaces(final List<Restaurant> places){
@@ -62,10 +54,6 @@ public class PlacesAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
     @Override public final int getItemCount() {
         return mPlaces.size();
-    }
-
-    public Restaurant getPlace(int position){
-        return this.mPlaces.get(position);
     }
 
 }
