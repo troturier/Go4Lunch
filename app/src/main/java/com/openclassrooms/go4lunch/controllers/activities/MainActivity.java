@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                             });
                                 }
                                 else {
-                                    Toast.makeText(getApplicationContext(), "No restaurant has been chosen yet", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), R.string.no_rest_chosen, Toast.LENGTH_LONG).show();
                                 }
                             });
                             break;
@@ -433,13 +433,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void setupTabsStyle(TabLayout tabLayout, ViewPager viewPager) {
         Objects.requireNonNull(tabLayout.getTabAt(0)).setIcon(R.drawable.ic_map);
-        Objects.requireNonNull(tabLayout.getTabAt(0)).setText("Map View");
+        Objects.requireNonNull(tabLayout.getTabAt(0)).setText(R.string.map_view_title);
 
         Objects.requireNonNull(tabLayout.getTabAt(1)).setIcon(R.drawable.ic_view_list);
-        Objects.requireNonNull(tabLayout.getTabAt(1)).setText("List View");
+        Objects.requireNonNull(tabLayout.getTabAt(1)).setText(R.string.list_view_title);
 
         Objects.requireNonNull(tabLayout.getTabAt(2)).setIcon(R.drawable.ic_workmates);
-        Objects.requireNonNull(tabLayout.getTabAt(2)).setText("Workmates");
+        Objects.requireNonNull(tabLayout.getTabAt(2)).setText(R.string.workmates_title);
 
         Objects.requireNonNull(Objects.requireNonNull(tabLayout.getTabAt(tabLayout.getSelectedTabPosition())).getIcon()).setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
 

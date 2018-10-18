@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_input_username">Nom d\'utilisateur</string>
+    <string name="info_no_email_found">Pas d\'adresse email</string>
+    <string name="info_no_username_found">Pas de nom d\'utilisateur</string>
+    <string name="error_authentication_canceled">Authentification annulée&#8230;</string>
+    <string name="error_no_internet">Pas de connexion Internet!</string>
+    <string name="error_unknown_error">Une erreur inconnue s\'est produite&#8230;</string>
+    <string name="connection_succeed">Authentification réussie!</string>
+    <string name="connect_first">Veuillez vous connecter</string>
+    <string name="your_lunch">VOTRE REPAS</string>
+    <string name="settings">PARAMETRES</string>
+    <string name="logout">DECONNEXION</string>
+    <string name="email_address">Adresse e-mail</string>
+    <string name="rational_string">Sans ces autorisations, l\'application ne peut pas fonctionner correctement. Elles sont nécessaires pour utiliser les services de géolocalisation. Merci de les accépter pour utiliser cette application dans les meilleures conditions possibles.</string>
+    <string name="search_restaurants">Rechercher des restaurants</string>
+    <string name="title_activity_detail">Activité de détail</string>
+    <string name="call">Appeler</string>
+    <string name="like">Aimer</string>
+    <string name="website">Site web</string>
+    <string name="restaurant_photo">Photo du restaurant</string>
+    <string name="im_hungry">J\'ai faim !</string>
+    <string name="restaurant_picture">Photo du restaurant</string>
+    <string name="workmates_icon">Icône de collègues</string>
+    <string name="res_list_opening">Ouvert jusqu\'à 19h</string>
+    <string name="someone_hasn_t_decided_yet">Quelqu\'un n\'a pas encore décidé</string>
+    <string name="no_website">Aucun site web trouvé pour ce restaurant</string>
+    <string name="open">Actuellement ouvert</string>
+    <string name="closed">Actuellement fermé</string>
+    <string name="map_view_title">Vue Carte</string>
+    <string name="list_view_title">Vue Liste</string>
+    <string name="workmates_title">Collègues</string>
+    <string name="no_rest_chosen">Aucun restaurant n\'a encore été choisi</string>
+    <string name="no_rest_chosen_workmates">%s n\'a pas encore choisi de restaurant</string>
+    <string name="is_eating">%s mange à %2s</string>
+    <string name="workmates_not_chosen">%s n\'a pas encore décidé</string>
+</resources>

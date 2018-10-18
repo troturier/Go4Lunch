@@ -15,6 +15,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.helpers.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
+import com.openclassrooms.go4lunch.utils.GetAppContext;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -63,14 +64,14 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder{
                 Places.GeoDataApi.getPlaceById(mGoogleApiClient, resId)
                         .setResultCallback(places -> {
                             if (places.getStatus().isSuccess() && places.getCount() > 0) {
-                                name.setText(String.format("%s is eating at %2s", username[0], places.get(0).getName()));
+                                name.setText(String.format(GetAppContext.getContext().getString(R.string.is_eating), username[0], places.get(0).getName()));
                                 name.setTextColor(Color.BLACK);
                                 name.setTypeface(null, Typeface.NORMAL);
                             }
                         });
             }
             else {
-                name.setText(String.format("%s hasn't decided yet", username[0]));
+                name.setText(String.format(GetAppContext.getContext().getString(R.string.workmates_not_chosen), username[0]));
             }
         });
     }

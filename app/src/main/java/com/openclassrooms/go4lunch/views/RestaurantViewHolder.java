@@ -66,7 +66,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
         if(place.getDistance() > 1000){
             distFloat = distFloat/1000;
-            DecimalFormat decForm = new DecimalFormat("#.#");
+            DecimalFormat decForm = new DecimalFormat("#,#");
             Double distDouble = Double.valueOf(decForm.format(distFloat));
             dist = Double.toString(distDouble);
             distance.setText(String.format("%skm", dist));

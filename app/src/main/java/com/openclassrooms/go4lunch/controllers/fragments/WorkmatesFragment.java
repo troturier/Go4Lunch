@@ -169,7 +169,7 @@ public class WorkmatesFragment extends Fragment {
                         }
                         else{
                             String[] username = mWorkmatesAdapter.getUser(position).getUsername().split(" ");
-                            Toast.makeText(getApplicationContext(), format("No restaurant has been chosen by %s yet", username[0]), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), format(getString(R.string.no_rest_chosen_workmates), username[0]), Toast.LENGTH_SHORT).show();
                         }
                     });
                 });

@@ -1,28 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="text_input_username">Username</string>
+    <string name="info_no_email_found">No email address</string>
+    <string name="info_no_username_found">No username</string>
+    <string name="error_authentication_canceled">Authentication canceled&#8230;</string>
+    <string name="error_no_internet">No internet connection!</string>
+    <string name="error_unknown_error">An unknown error has occurred&#8230;</string>
+    <string name="connection_succeed">Successful authentication!</string>
+    <string name="connect_first">Please login</string>
     <string name="your_lunch">YOUR LUNCH</string>
     <string name="settings">SETTINGS</string>
     <string name="logout">LOGOUT</string>
     <string name="email_address">E-mail address</string>
     <string name="rational_string">Without these permissions, the application is unable to function properly. They are needed to use geolocation services. Please allow them in order to use this application in the best possible conditions.</string>
-    <string name="textview" translatable="false">TextView</string>
+    <string name="search_restaurants">Search restaurants</string>
+    <string name="title_activity_detail">Detail Activity</string>
     <string name="call">Call</string>
     <string name="like">Like</string>
     <string name="website">Website</string>
-    <string name="star_2_3" translatable="false">Star 2/3</string>
-    <string name="star_1_3" translatable="false"><![CDATA[Star &#8531;]]></string>
-    <string name="star_3_3" translatable="false">Star 3/3</string>
+    <string name="restaurant_photo">Restaurant photo</string>
+    <string name="im_hungry">I\'m Hungry !</string>
     <string name="restaurant_picture">Restaurant picture</string>
     <string name="workmates_icon">Workmates icon</string>
-    <string name="res_list_workmates_tv" translatable="false">(2)</string>
-    <string name="res_list_distance" translatable="false">120m</string>
     <string name="res_list_opening">Open until 7pm</string>
-    <string name="res_list_address" translatable="false">12 rue du Faubourg Poissonnnière</string>
-    <string name="res_list_name" translatable="false">Le Zinc</string>
     <string name="someone_hasn_t_decided_yet">Someone hasn\'t decided yet</string>
     <string name="no_website">No website found for this restaurant</string>
     <string name="open">Currently open</string>
-    <string name="search_restaurants">Search restaurants</string>
+    <string name="closed">Currently closed</string>
     <string name="map_view_title">Map View</string>
     <string name="list_view_title">List View</string>
     <string name="workmates_title">Workmates</string>
