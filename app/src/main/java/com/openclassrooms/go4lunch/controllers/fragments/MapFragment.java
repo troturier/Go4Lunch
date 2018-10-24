@@ -3,26 +3,19 @@ package com.openclassrooms.go4lunch.controllers.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -33,22 +26,17 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
 import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.Restaurant;
-import com.openclassrooms.go4lunch.utils.GetAppContext;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +49,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 @SuppressWarnings("FieldCanBeLocal")
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, EasyPermissions.PermissionCallbacks {
 
-    private GoogleMap mGoogleMap;
+    private static GoogleMap mGoogleMap;
     private MapView mapView;
     private View mView;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -76,14 +64,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     private double latitude;
     private double longitude;
 
-    private AutoCompleteTextView mSearchText;
-
-    private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
-
     private static final float DEFAULT_ZOOM = 17f;
-
-    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
-            new LatLng(-40, -168), new LatLng(71, 136));
 
     public MapFragment() {
         // Required empty public constructor
@@ -94,61 +75,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         super.onCreate(savedInstanceState);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
         mGoogleApiClient = MainActivity.mGoogleApiClient;
-
-        mSearchText = getActivity().findViewById(R.id.input_search);
-
-
-        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
-                .setCountry("FR")
-                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
-                .build();
-
-        mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(getActivity(), mGoogleApiClient,
-                LAT_LNG_BOUNDS, typeFilter);
-
-        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
-
-        mSearchText.setOnItemClickListener((parent, view, position, id) -> geoLocate());
-
-        mSearchText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
-            if(actionId == EditorInfo.IME_ACTION_SEARCH
-                    || actionId == EditorInfo.IME_ACTION_DONE
-                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER){
-                //execute our method for searching
-                geoLocate();
-            }
-            return false;
-        });
     }
 
-    private void geoLocate(){
-        Log.d("GeoLocate", "geoLocate: geolocating");
-        String searchString = mSearchText.getText().toString();
-        Geocoder geocoder = new Geocoder(getActivity());
-        List<Address> list = new ArrayList<>();
-        try{
-            list = geocoder.getFromLocationName(searchString, 1);
-        }catch (IOException e){
-            Log.e("GeoLocate", "geoLocate: IOException: " + e.getMessage() );
-        }
-        if(list.size() > 0){
-            Address address = list.get(0);
-            Log.d("GeoLocate", "geoLocate: found a location: " + address.toString());
-            switch (MainActivity.currentTab){
-                case 0:
-                    moveCamera(new LatLng(address.getLatitude(), address.getLongitude()));
-                    break;
-                case 1:
-                    Toast.makeText(GetAppContext.getContext(), "Current tab is list view", Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    private void moveCamera(LatLng latLng){
+    public static void moveCamera(LatLng latLng){
         Log.d("Move Camera", "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MapFragment.DEFAULT_ZOOM));
     }

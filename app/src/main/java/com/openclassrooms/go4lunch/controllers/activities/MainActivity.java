@@ -3,6 +3,8 @@ package com.openclassrooms.go4lunch.controllers.activities;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,8 +19,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,9 +37,12 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -42,15 +50,21 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.openclassrooms.go4lunch.R;
+import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
 import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;
+import com.openclassrooms.go4lunch.controllers.fragments.MapFragment;
 import com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment;
 import com.openclassrooms.go4lunch.helpers.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
+import com.openclassrooms.go4lunch.utils.GetAppContext;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -78,6 +92,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DrawerLayout mDrawerLayout;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+
+    private AutoCompleteTextView mSearchText;
+
+    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
+            new LatLng(-40, -168), new LatLng(71, 136));
 
     public static int currentTab;
 
@@ -188,7 +207,56 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             });*/
         }
 
+        mSearchText = findViewById(R.id.input_search);
 
+
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                .setCountry("FR")
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
+                .build();
+
+        PlaceAutocompleteAdapter mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient,
+                LAT_LNG_BOUNDS, typeFilter);
+
+        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
+
+        mSearchText.setOnItemClickListener((parent, view, position, id) -> geoLocate());
+
+        mSearchText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if(actionId == EditorInfo.IME_ACTION_SEARCH
+                    || actionId == EditorInfo.IME_ACTION_DONE
+                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER){
+                //execute our method for searching
+                geoLocate();
+            }
+            return false;
+        });
+    }
+
+    private void geoLocate(){
+        Log.d("GeoLocate", "geoLocate: geolocating");
+        String searchString = mSearchText.getText().toString();
+        Geocoder geocoder = new Geocoder(this);
+        List<Address> list = new ArrayList<>();
+        try{
+            list = geocoder.getFromLocationName(searchString, 1);
+        }catch (IOException e){
+            Log.e("GeoLocate", "geoLocate: IOException: " + e.getMessage() );
+        }
+        if(list.size() > 0){
+            Address address = list.get(0);
+            Log.d("GeoLocate", "geoLocate: found a location: " + address.toString());
+            switch (MainActivity.currentTab){
+                case 0:
+                    MapFragment.moveCamera(new LatLng(address.getLatitude(), address.getLongitude()));
+                    break;
+                case 1:
+                    Toast.makeText(GetAppContext.getContext(), "Current tab is list view", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     // --------------------
