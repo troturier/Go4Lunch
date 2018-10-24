@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
@@ -58,6 +60,10 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
         Log.d("nearbyplacesdata","called parse method");
         showNearbyPlaces(nearbyPlaceList);
         if(tabrequest == 3) {
+            Set<Restaurant> hs = new HashSet<>(restaurantListData);
+            restaurantListData.clear();
+            restaurantListData.addAll(hs);
+
             Collections.sort(restaurantListData, (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
 
             Intent intent = new Intent("com.action.test");
@@ -68,7 +74,9 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
     private void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList)
     {
-        restaurantListData = new ArrayList<>();
+        if(restaurantListData == null) {
+            restaurantListData = new ArrayList<>();
+        }
         for (int i = 0; i < nearbyPlaceList.size(); i++) {
             HashMap<String, String> googlePlace = nearbyPlaceList.get(i);
             if(!googlePlace.isEmpty()){
@@ -111,6 +119,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
                     MapFragment.setMarkerIcon(restaurant);
 
                     restaurantListData.add(restaurant);
+
                 }
 
             }

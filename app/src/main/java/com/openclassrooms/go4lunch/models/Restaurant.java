@@ -2,6 +2,8 @@ package com.openclassrooms.go4lunch.models;
 
 import com.google.android.gms.maps.model.Marker;
 
+import java.util.Objects;
+
 public class Restaurant {
 
     private String id;
@@ -72,5 +74,26 @@ public class Restaurant {
 
     public void setMarker(Marker marker) {
         this.marker = marker;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return  false;
+        Restaurant restaurant = (Restaurant) o;
+        return id.equals(restaurant.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Restaurant{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }
