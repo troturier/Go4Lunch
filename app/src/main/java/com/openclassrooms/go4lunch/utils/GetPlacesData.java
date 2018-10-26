@@ -109,6 +109,9 @@ public class GetPlacesData extends AsyncTask<Object, String, String> {
                     }
                     photoMetadataBuffer.release();
                 }
+                else {
+                    iv.setImageResource(R.drawable.background_image_r);
+                }
 
                 return null;
             }

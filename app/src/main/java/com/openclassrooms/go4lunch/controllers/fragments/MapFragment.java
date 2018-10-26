@@ -27,6 +27,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.openclassrooms.go4lunch.R;
@@ -64,8 +66,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     private double latitude;
     private double longitude;
 
-    private static final float DEFAULT_ZOOM = 17f;
-
     public MapFragment() {
         // Required empty public constructor
     }
@@ -75,11 +75,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         super.onCreate(savedInstanceState);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
         mGoogleApiClient = MainActivity.mGoogleApiClient;
-    }
-
-    public static void moveCamera(LatLng latLng){
-        Log.d("Move Camera", "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MapFragment.DEFAULT_ZOOM));
     }
 
     //@AfterPermissionGranted(RC_LOCATION)
@@ -245,17 +240,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         }
     }
 
+    public  static void setMarkersIcon(List<Restaurant> restaurantList){
+        MapFragment.mGoogleMap.clear();
+        for (int i=0; i<restaurantList.size(); i++){
+            MapFragment.setMarkerIcon(restaurantList.get(i));
+        }
+    }
+
     public static void setMarkerIcon(Restaurant restaurant){
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);
 
+        MarkerOptions markerOptions = new MarkerOptions();
+
+        markerOptions.position(restaurant.getLatLng());
+        markerOptions.title(restaurant.getName() + " : " + restaurant.getAddress());
+        markerOptions.snippet(restaurant.getId());
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
+
+        Marker marker = mGoogleMap.addMarker(markerOptions);
+
+        restaurant.setMarker(marker);
+
         Task<QuerySnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(restaurant.getId()).collection("dates").document(mDate).collection("users").get();
         doc.addOnCompleteListener(task -> {
             if (Objects.requireNonNull(task.getResult()).size() > 0) {
                 restaurant.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_green));
-            } else {
-                restaurant.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
             }
         });
     }
@@ -289,7 +300,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         EasyPermissions.requestPermissions(this, getString(R.string.rational_string), 456, perms);
     }
 
-    public String getUrl(double latitude, double longitude, String nearbyPlace)
+    private String getUrl(double latitude, double longitude, String nearbyPlace)
     {
 
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");

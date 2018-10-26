@@ -1,10 +1,10 @@
 package com.openclassrooms.go4lunch.controllers.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.location.Address;
-import android.location.Geocoder;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,14 +16,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.text.style.CharacterStyle;
+import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -36,6 +36,7 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.GeoDataClient;
@@ -49,24 +50,28 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.maps.android.SphericalUtil;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.adapters.PlaceAutocompleteAdapter;
 import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;
 import com.openclassrooms.go4lunch.controllers.fragments.MapFragment;
 import com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment;
 import com.openclassrooms.go4lunch.helpers.UserHelper;
+import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
+import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -93,12 +98,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
-    private AutoCompleteTextView mSearchText;
+    private FusedLocationProviderClient mFusedLocationClient;
 
-    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
-            new LatLng(-40, -168), new LatLng(71, 136));
-
-    public static int currentTab;
+    private static final CharacterStyle STYLE_NORMAL = new StyleSpan(Typeface.NORMAL);
 
     private Place selected_place;
 
@@ -195,68 +197,91 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             tabLayout = findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(viewPager);
             setupTabsStyle(tabLayout, viewPager);
-
-            /* final ArrayAdapterSearchView searchView = (ArrayAdapterSearchView)searchItem.getActionView();
-            searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    searchView.setText(menu.getItem(position).toString());
-
-                }
-            });*/
         }
 
-        mSearchText = findViewById(R.id.input_search);
-
+        SearchView searchView = findViewById(R.id.searchView);
 
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setCountry("FR")
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
                 .build();
 
-        PlaceAutocompleteAdapter mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient,
-                LAT_LNG_BOUNDS, typeFilter);
-
-        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
-
-        mSearchText.setOnItemClickListener((parent, view, position, id) -> geoLocate());
-
-        mSearchText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
-            if(actionId == EditorInfo.IME_ACTION_SEARCH
-                    || actionId == EditorInfo.IME_ACTION_DONE
-                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER){
-                //execute our method for searching
-                geoLocate();
-            }
+        searchView.setOnCloseListener(() -> {
+            RestaurantsListFragment.mPlaceAdapter.setPlaces(GetNearbyPlacesData.restaurantListData);
+            RestaurantsListFragment.mPlaceAdapter.notifyDataSetChanged();
+            MapFragment.setMarkersIcon(GetNearbyPlacesData.restaurantListData);
             return false;
         });
+
+        searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @SuppressLint("MissingPermission")
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(!newText.isEmpty()){
+
+                    mFusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(GetAppContext.getContext()));
+
+                    mFusedLocationClient.getLastLocation().addOnCompleteListener(task -> {
+                        LatLng latLng = new LatLng(Objects.requireNonNull(task.getResult()).getLatitude(), task.getResult().getLongitude());
+
+                        mGeoDataClient.getAutocompletePredictions(newText, toBounds(latLng), typeFilter).addOnCompleteListener(task1 -> {
+                            ArrayList<Restaurant> restaurantList = new ArrayList<>();
+                            ArrayList<Restaurant> combinedList = new ArrayList<>();
+                            for (int i = 0; i < Objects.requireNonNull(task1.getResult()).getCount(); i++) {
+                                Restaurant restaurant = new Restaurant();
+                                restaurant.setName(task1.getResult().get(i).getPrimaryText(STYLE_NORMAL).toString());
+                                restaurant.setAddress(task1.getResult().get(i).getSecondaryText(STYLE_NORMAL).toString());
+                                restaurant.setId(task1.getResult().get(i).getPlaceId());
+                                restaurantList.add(restaurant);
+                            }
+                            combinedList.addAll(restaurantList);
+                            combinedList.addAll(GetNearbyPlacesData.restaurantListData);
+                            RestaurantsListFragment.mPlaceAdapter.setPlaces(findDuplicates(combinedList));
+                            RestaurantsListFragment.mPlaceAdapter.notifyDataSetChanged();
+                            MapFragment.setMarkersIcon(findDuplicates(combinedList));
+                            Log.d("AutoComp", restaurantList.toString());
+                        });
+                    });
+
+                    }
+                else {
+                    RestaurantsListFragment.mPlaceAdapter.setPlaces(GetNearbyPlacesData.restaurantListData);
+                    RestaurantsListFragment.mPlaceAdapter.notifyDataSetChanged();
+                    MapFragment.setMarkersIcon(GetNearbyPlacesData.restaurantListData);
+                }
+                return false;
+            }
+        });
+
     }
 
-    private void geoLocate(){
-        Log.d("GeoLocate", "geoLocate: geolocating");
-        String searchString = mSearchText.getText().toString();
-        Geocoder geocoder = new Geocoder(this);
-        List<Address> list = new ArrayList<>();
-        try{
-            list = geocoder.getFromLocationName(searchString, 1);
-        }catch (IOException e){
-            Log.e("GeoLocate", "geoLocate: IOException: " + e.getMessage() );
-        }
-        if(list.size() > 0){
-            Address address = list.get(0);
-            Log.d("GeoLocate", "geoLocate: found a location: " + address.toString());
-            switch (MainActivity.currentTab){
-                case 0:
-                    MapFragment.moveCamera(new LatLng(address.getLatitude(), address.getLongitude()));
-                    break;
-                case 1:
-                    Toast.makeText(GetAppContext.getContext(), "Current tab is list view", Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
+    private LatLngBounds toBounds(LatLng center) {
+        double distanceFromCenterToCorner = (double) 10000 * Math.sqrt(2.0);
+        LatLng southwestCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
+        LatLng northeastCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
+        return new LatLngBounds(southwestCorner, northeastCorner);
+    }
+
+    private static List<Restaurant> findDuplicates(List<Restaurant> listContainingDuplicates) {
+
+        final Set<Restaurant> setToReturn = new HashSet<>();
+        final Set<Restaurant> set1 = new HashSet<>();
+
+        for (Restaurant restaurant : listContainingDuplicates) {
+            if (!set1.add(restaurant)) {
+                setToReturn.add(restaurant);
             }
         }
+        List<Restaurant> restaurantList = new ArrayList<>(setToReturn);
+        Collections.sort(restaurantList, (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
+        return restaurantList;
     }
 
     // --------------------
@@ -516,7 +541,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
-                currentTab = tab.getPosition();
                 if (tab.getIcon() != null) {
                     tab.getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
                 }

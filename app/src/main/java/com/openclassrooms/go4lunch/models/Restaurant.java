@@ -1,5 +1,6 @@
 package com.openclassrooms.go4lunch.models;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.Objects;
@@ -12,6 +13,7 @@ public class Restaurant {
     private Float rating;
     private Boolean open;
     private Float distance;
+    private LatLng latLng;
     private Marker marker;
 
     public Restaurant(String id) {
@@ -95,5 +97,13 @@ public class Restaurant {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    public LatLng getLatLng() {
+        return latLng;
+    }
+
+    public void setLatLng(LatLng latLng) {
+        this.latLng = latLng;
     }
 }

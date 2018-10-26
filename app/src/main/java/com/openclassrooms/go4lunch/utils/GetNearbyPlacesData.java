@@ -102,6 +102,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
                     restaurant.setName(googlePlace.get("place_name"));
                     restaurant.setOpen(Boolean.parseBoolean(googlePlace.get("opening")));
                     restaurant.setRating(Float.parseFloat(googlePlace.get("rating")));
+                    restaurant.setLatLng(latLng);
                     restaurant.setMarker(marker);
 
                     Location locationA = new Location("point A");
