@@ -239,6 +239,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 restaurant.setId(task1.getResult().get(i).getPlaceId());
                                 restaurantList.add(restaurant);
                             }
+                            for (int i = 0; i < GetNearbyPlacesData.restaurantListData.size(); i++) {
+                                if(GetNearbyPlacesData.restaurantListData.get(i).getName().toLowerCase().contains(newText.toLowerCase())){
+                                    restaurantList.add(GetNearbyPlacesData.restaurantListData.get(i));
+                                }
+                            }
                             combinedList.addAll(restaurantList);
                             combinedList.addAll(GetNearbyPlacesData.restaurantListData);
                             RestaurantsListFragment.mPlaceAdapter.setPlaces(findDuplicates(combinedList));
