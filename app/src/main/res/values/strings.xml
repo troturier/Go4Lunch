@@ -18,6 +18,7 @@
     <string name="facebook_application_id" translatable="false">795035227370258</string>
     <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb795035227370258</string>
     <string name="connect_first">Please login</string>
+
     <string name="your_lunch">YOUR LUNCH</string>
     <string name="settings">SETTINGS</string>
     <string name="logout">LOGOUT</string>
@@ -52,4 +53,7 @@
     <string name="no_rest_chosen_workmates">No restaurant has been chosen by %s yet</string>
     <string name="is_eating">%s is eating at %2s</string>
     <string name="workmates_not_chosen">%s hasn\'t decided yet</string>
+
+    <string name="searchHint">Search restaurants</string>
+    <string name="available_workmates">Available workmates</string>
 </resources>

@@ -4,5 +4,9 @@
     <color name="colorPrimaryDark">#c21b01</color>
     <color name="colorAccent">#ffa000</color>
     <color name="colorDrawer">#fd8950</color>
+    <color name="text_color_primary">#ffffff</color>
+    <color name="text_color_secondary">#ffffff</color>
+    <color name="secondary_text_material_dark">#ffffff</color>
+    <color name="primary_text_material_dark">#ffffff</color>
 
 </resources>

@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             return false;
         });
 
+
         searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -548,6 +549,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 viewPager.setCurrentItem(tab.getPosition());
                 if (tab.getIcon() != null) {
                     tab.getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
+                }
+                if (tab.getPosition() == 2){
+                    ActionBar actionbar = getSupportActionBar();
+                    Objects.requireNonNull(actionbar).setTitle(R.string.available_workmates);
+                }
+                else {
+                    ActionBar actionbar = getSupportActionBar();
+                    Objects.requireNonNull(actionbar).setTitle(R.string.im_hungry);
                 }
             }
 

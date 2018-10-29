@@ -30,4 +30,5 @@
     <string name="no_rest_chosen_workmates">No restaurant has been chosen by %s yet</string>
     <string name="is_eating">%s is eating at %2s</string>
     <string name="workmates_not_chosen">%s hasn\'t decided yet</string>
+    <string name="available_workmates">Available workmates</string>
 </resources>

@@ -20,6 +20,7 @@
     <string name="website">Site web</string>
     <string name="restaurant_photo">Photo du restaurant</string>
     <string name="im_hungry">J\'ai faim !</string>
+    <string name="available_workmates">Collègues disponibles</string>
     <string name="restaurant_picture">Photo du restaurant</string>
     <string name="workmates_icon">Icône de collègues</string>
     <string name="res_list_opening">Ouvert jusqu\'à 19h</string>
@@ -34,4 +35,5 @@
     <string name="no_rest_chosen_workmates">%s n\'a pas encore choisi de restaurant</string>
     <string name="is_eating">%s mange à %2s</string>
     <string name="workmates_not_chosen">%s n\'a pas encore décidé</string>
+    <string name="searchHint">Rechercher des restaurants</string>
 </resources>
