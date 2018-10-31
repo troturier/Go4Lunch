@@ -60,6 +60,7 @@ import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
+import com.openclassrooms.go4lunch.utils.Notification;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -151,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 bool[0] = Objects.requireNonNull(doc.getResult()).exists();
                                 if(bool[0]){
                                     DocumentSnapshot document = task.getResult();
-                                    String resId = Objects.requireNonNull(document).getString("uid");
+                                    String resId = Objects.requireNonNull(document).getString("id");
                                     Places.GeoDataApi.getPlaceById(mGoogleApiClient, resId)
                                             .setResultCallback(places -> {
                                                 if (places.getStatus().isSuccess() && places.getCount() > 0) {
@@ -263,6 +264,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 return false;
             }
         });
+
+        Notification.createNotification();
 
     }
 

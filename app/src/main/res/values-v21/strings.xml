@@ -31,4 +31,6 @@
     <string name="is_eating">%s is eating at %2s</string>
     <string name="workmates_not_chosen">%s hasn\'t decided yet</string>
     <string name="available_workmates">Available workmates</string>
+    <string name="you_have_chosen">"You have chosen "</string>
+    <string name="people_joining_you">People joining you :</string>
 </resources>

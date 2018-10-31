@@ -36,4 +36,6 @@
     <string name="is_eating">%s mange à %2s</string>
     <string name="workmates_not_chosen">%s n\'a pas encore décidé</string>
     <string name="searchHint">Rechercher des restaurants</string>
+    <string name="you_have_chosen">"Vous avez choisi "</string>
+    <string name="people_joining_you">Les personnes se joignant à vous :</string>
 </resources>
