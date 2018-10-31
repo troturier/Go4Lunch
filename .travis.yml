@@ -17,14 +17,14 @@ android:
   - android-${ANDROID_API}
   - build-tools-${ANDROID_BUILD_TOOLS}
   - extra
-  - sys-img-armeabi-v7a-google_apis-21
-  - sys-img-armeabi-v7a-google_apis-21
+  - sys-img-armeabi-v7a-google_apis-22
+  - sys-img-armeabi-v7a-google_apis-22
 
 install:
   - echo yes | sdkmanager "build-tools;28.0.0-rc1"
 
 before_script:
-  - echo no | android create avd --force -n test -t "android-21" --abi $ANDROID_ABI --tag $ANDROID_TAG
+  - echo no | android create avd --force -n test -t "android-22" --abi $ANDROID_ABI --tag $ANDROID_TAG
   - emulator -avd test -no-window &
   - travis_wait android-wait-for-emulator
   - travis_wait adb shell input keyevent 82 &
