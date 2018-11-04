@@ -38,4 +38,5 @@
     <string name="available_workmates">Available workmates</string>
     <string name="you_have_chosen">"You have chosen "</string>
     <string name="people_joining_you">People joining you :</string>
+    <string name="nobody_joined">No colleagues have joined you for the moment</string>
 </resources>

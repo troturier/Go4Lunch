@@ -93,7 +93,7 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
                                 Intent intent = new Intent(getActivity(), DetailActivity.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putString("place_id", places.get(0).getId());
-                                bundle.putString("place_website", Objects.requireNonNull(Objects.requireNonNull(places.get(0).getWebsiteUri()).toString()));
+                                if(places.get(0).getWebsiteUri() != null) bundle.putString("place_website", Objects.requireNonNull(Objects.requireNonNull(places.get(0).getWebsiteUri()).toString()));
                                 bundle.putString("place_name", places.get(0).getName().toString());
                                 bundle.putString("place_phone", Objects.requireNonNull(Objects.requireNonNull(places.get(0).getPhoneNumber()).toString()));
                                 bundle.putString("place_address", Objects.requireNonNull(Objects.requireNonNull(places.get(0).getAddress()).toString()));

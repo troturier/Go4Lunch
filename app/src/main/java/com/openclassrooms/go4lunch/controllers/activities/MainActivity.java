@@ -60,7 +60,6 @@ import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
-import com.openclassrooms.go4lunch.utils.Notification;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -264,9 +263,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 return false;
             }
         });
-
-        Notification.createNotification();
-
     }
 
     private LatLngBounds toBounds(LatLng center) {
@@ -484,9 +480,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                         Arrays.asList(
                                                 new AuthUI.IdpConfig.GoogleBuilder().build(),
                                                 new AuthUI.IdpConfig.FacebookBuilder().build(),
+                                                new AuthUI.IdpConfig.TwitterBuilder().build(),
                                                 new AuthUI.IdpConfig.EmailBuilder().build()))
                                 .setIsSmartLockEnabled(false, true)
-                                .setLogo(R.drawable.ic_logo)
                                 .build(),
                         RC_SIGN_IN);
     }

@@ -14,6 +14,9 @@
 
     <!-- NOTIFICATION SERVICE -->
 
+    <string name="twitter_consumer_key" translatable="false">UyHvFC2xQVxYddTVdJsNiByDr</string>
+    <string name="twitter_consumer_secret" translatable="false">zBErC4uZhkk6I8XpnWLfs3IQ5YSaA6uz5qddZ8W4Dv1hQ2F3mc</string>
+
     <!-- FACEBOOK PURPOSE -->
     <string name="facebook_application_id" translatable="false">795035227370258</string>
     <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb795035227370258</string>
@@ -58,4 +61,5 @@
     <string name="available_workmates">Available workmates</string>
     <string name="you_have_chosen">"You have chosen "</string>
     <string name="people_joining_you">People joining you :</string>
+    <string name="nobody_joined">No colleagues have joined you for the moment</string>
 </resources>

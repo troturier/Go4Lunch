@@ -12,8 +12,6 @@ import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.utils.GetPlacesData;
 
-import java.text.DecimalFormat;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -66,9 +64,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
         if(place.getDistance() > 1000){
             distFloat = distFloat/1000;
-            DecimalFormat decForm = new DecimalFormat("#,#");
-            Double distDouble = Double.valueOf(decForm.format(distFloat));
-            dist = Double.toString(distDouble);
+            dist = String.format("%.1f", distFloat);
             distance.setText(String.format("%skm", dist));
         }
         else {
@@ -85,13 +81,15 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             opening.setTextColor(RED);
         }
 
-        float rating = place.getRating();
-        if (rating > 1) {
-            star1.setVisibility(View.VISIBLE);
-            if (rating > 2.5) {
-                star2.setVisibility(View.VISIBLE);
-                if (rating > 4) {
-                    star3.setVisibility(View.VISIBLE);
+        if(place.getRating() != null){
+            float rating = place.getRating();
+            if (rating > 1) {
+                star1.setVisibility(View.VISIBLE);
+                if (rating > 2.5) {
+                    star2.setVisibility(View.VISIBLE);
+                    if (rating > 4) {
+                        star3.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         }

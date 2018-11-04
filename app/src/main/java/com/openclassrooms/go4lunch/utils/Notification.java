@@ -3,18 +3,22 @@ package com.openclassrooms.go4lunch.utils;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
@@ -32,11 +36,28 @@ import java.util.Objects;
 import static com.openclassrooms.go4lunch.controllers.activities.MainActivity.mGoogleApiClient;
 import static com.openclassrooms.go4lunch.helpers.UserHelper.getCurrentUser;
 
-public class Notification {
+public class Notification extends FirebaseMessagingService {
+
+    @Override
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+        if (remoteMessage.getNotification() != null) {
+            // Show notification after received message
+            createNotification();
+        }
+    }
 
     public static void createNotification (){
 
         createNotificationChannel();
+
+        if(mGoogleApiClient == null){
+            mGoogleApiClient = new GoogleApiClient
+                    .Builder(GetAppContext.getContext())
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -78,6 +99,10 @@ public class Notification {
                                             }
                                         }
 
+                                        if(firstPerson[0]){
+                                            usersJoining[0] = GetAppContext.getContext().getString(R.string.nobody_joined);
+                                        }
+
                                         Intent intent = new Intent(GetAppContext.getContext(), DetailActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         Bundle bundle = new Bundle();
@@ -91,23 +116,23 @@ public class Notification {
 
                                         PendingIntent pendingIntent = PendingIntent.getActivity(GetAppContext.getContext(), 0, intent, 0);
 
-
                                         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(GetAppContext.getContext(), "1")
-                                                .setSmallIcon(R.drawable.ic_logo)
+                                                .setSmallIcon(R.drawable.ic_stat_name)
                                                 .setContentTitle("Go4Lunch")
                                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(GetAppContext.getContext().getString(R.string.you_have_chosen) + places.get(0).getName() + "\n" + usersJoining[0]))
+                                                .setStyle(new NotificationCompat.InboxStyle()
+                                                        .addLine(GetAppContext.getContext().getString(R.string.you_have_chosen) + places.get(0).getName())
+                                                        .addLine(usersJoining[0]))
                                                 .setContentIntent(pendingIntent)
                                                 .setAutoCancel(true);
 
-                                        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(GetAppContext.getContext());
+                                        NotificationManager notificationManager = (NotificationManager) GetAppContext.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
                                         // notificationId is a unique int for each notification that you must define
-                                        notificationManager.notify(1, mBuilder.build());
+                                        Objects.requireNonNull(notificationManager).notify(1, mBuilder.build());
+
                                     }
                                 });
-
-
                             }
                         });
             }

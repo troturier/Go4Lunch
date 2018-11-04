@@ -101,7 +101,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
                     restaurant.setId(googlePlace.get("id"));
                     restaurant.setName(googlePlace.get("place_name"));
                     restaurant.setOpen(Boolean.parseBoolean(googlePlace.get("opening")));
-                    restaurant.setRating(Float.parseFloat(googlePlace.get("rating")));
+                    if(!googlePlace.get("rating").isEmpty() && googlePlace.get("rating") != null) restaurant.setRating(Float.parseFloat(googlePlace.get("rating")));
                     restaurant.setLatLng(latLng);
                     restaurant.setMarker(marker);
 

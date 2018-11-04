@@ -38,4 +38,5 @@
     <string name="searchHint">Rechercher des restaurants</string>
     <string name="you_have_chosen">"Vous avez choisi "</string>
     <string name="people_joining_you">Les personnes se joignant à vous :</string>
+    <string name="nobody_joined">Aucun collègue ne s\'est joint à vous pour le moment</string>
 </resources>
