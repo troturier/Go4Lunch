@@ -22,36 +22,53 @@ public class UserHelper {
 
     // --- COLLECTION REFERENCE ---
 
+    /**
+     * Retrieve the User CollectionReference
+     * @return CollectionReference
+     */
     public static CollectionReference getUsersCollection(){
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
     }
 
     // --- CREATE ---
 
+    /**
+     * Create a user in FireStore
+     * @param uid User id
+     * @param username Username
+     * @param urlPicture User's picture URL
+     * @return Task
+     */
     public static Task<Void> createUser(String uid, String username, String urlPicture) {
-        // 1 - Create Obj
         User userToCreate = new User(uid, username, urlPicture);
-
         return UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
 
     // --- GET ---
 
+    /**
+     * Return data associated with a given user
+     * @param uid User id
+     * @return User data
+     */
     public static Task<DocumentSnapshot> getUser(String uid){
         return UserHelper.getUsersCollection().document(uid).get();
     }
 
+    /**
+     * Return the current user connected in the application
+     * @return User
+     */
     @Nullable
     public static FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
 
-    // --- DELETE ---
-
-    public static Task<Void> deleteUser(String uid) {
-        return UserHelper.getUsersCollection().document(uid).delete();
-    }
-
     // --- CHOOSE FUNCTION ---
 
+    /**
+     * Add a restaurant to a user "Choose" list in FireStore for the current date
+     * @param uid User id
+     * @param id Restaurant id
+     */
     static void chooseRestaurant(String uid, String id){
         Restaurant restaurantToCreate = new Restaurant(id);
         Date date = Calendar.getInstance().getTime();
@@ -60,6 +77,10 @@ public class UserHelper {
         UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).set(restaurantToCreate);
     }
 
+    /**
+     * Delete the chosen restaurant from a user "Choose" list in FireStore for the current date
+     * @param uid User id
+     */
     static void unchooseRestaurant(String uid){
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -67,5 +88,4 @@ public class UserHelper {
 
         UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).delete();
     }
-
 }

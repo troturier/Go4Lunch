@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-
+/**
+ * Class used to parse data from a Google Place API JSON response
+ */
 class DataParser {
 
     private HashMap<String, String> getPlace(JSONObject googlePlaceJson)
@@ -67,6 +69,7 @@ class DataParser {
         return googlePlaceMap;
 
     }
+
     private List<HashMap<String, String>>getPlaces(JSONArray jsonArray)
     {
         int count = jsonArray.length();

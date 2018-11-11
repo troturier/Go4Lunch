@@ -43,6 +43,9 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * Fragment containing the list view
+ */
 public class RestaurantsListFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PlacesAdapter.Listener{
 
     // FOR DESIGN
@@ -130,6 +133,10 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
         return mPlacesView;
     }
 
+    /**
+     * Show a progress indicator in the form of a Snackbar
+     * @param message Message content
+     */
     public void showProgressIndicator(final String message) {
         SwipeRefreshLayout sRefreshLayout = Objects.requireNonNull(getView()).findViewById(R.id.fragment_restaurant_list_swipe_container);
         Snackbar mSnackbar = Snackbar.make(sRefreshLayout, message, Snackbar.LENGTH_INDEFINITE);
@@ -139,7 +146,10 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
         mSnackbar.show();
     }
 
-
+    /**
+     * Display a Toast message
+     * @param message Message content
+     */
     public void showMessage(final String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
@@ -212,6 +222,9 @@ public class RestaurantsListFragment extends Fragment implements GoogleApiClient
         void onCreationComplete();
     }
 
+    /**
+     * Used to update the list of restaurant in the RecyclerView accordingly to the result of the NearbySearch request
+     */
     private final BroadcastReceiver MyBroadCastReceiver = new BroadcastReceiver()
     {
         @Override

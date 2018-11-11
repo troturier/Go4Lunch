@@ -27,7 +27,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.openclassrooms.go4lunch.controllers.activities.MainActivity.mGoogleApiClient;
+import static com.openclassrooms.go4lunch.utils.Toolbox.getCurrentDate;
 
+/**
+ * Class used to create a new RecyclerView item of WorkmatesFragment
+ */
 public class WorkmatesViewHolder extends RecyclerView.ViewHolder{
 
     // FOR DESIGN
@@ -43,17 +47,18 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder{
 
     public void updateWithResult(User user, RequestManager glide) {
 
+        // Retrieves the user's photo
         if(user.getUrlPicture() != null){
             glide.load(user.getUrlPicture())
                     .apply(RequestOptions.circleCropTransform())
                     .into(workmateIv);
         }
 
+        // Get his first name only
         String[] username = user.getUsername().split(" ");
 
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        // Indicates if the user has chosen a restaurant
+        String mDate = getCurrentDate();
         Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(user.getUid())).collection("dates").document(mDate).get();
         final Boolean[] bool = new Boolean[1];
         doc.addOnCompleteListener(task -> {

@@ -12,6 +12,9 @@ import com.openclassrooms.go4lunch.views.WorkmatesViewHolder;
 
 import java.util.List;
 
+/**
+ * Adapter used to manage User objects for the WorkmatesFragment's RecyclerView
+ */
 public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesViewHolder> {
 
     private final List<User> mUsers;

@@ -1,15 +1,12 @@
 package com.openclassrooms.go4lunch.helpers;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -23,22 +20,38 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * Helper used to communicate with the Restaurant part of the Firestore database
+ */
 public class RestaurantHelper {
     private static final String COLLECTION_NAME = "restaurants";
 
     // --- COLLECTION REFERENCE ---
 
+    /**
+     * Retrieve the Restaurant CollectionReference
+     * @return CollectionReference
+     */
     public static CollectionReference getRestaurantsCollection(){
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
     }
 
     // --- CREATE ---
 
+    /**
+     * Create a restaurant in FireStore
+     * @param id Restaurant id
+     */
     private static void createRestaurant(String id) {
         Restaurant restaurantToCreate = new Restaurant(id);
         RestaurantHelper.getRestaurantsCollection().document(id).set(restaurantToCreate);
     }
 
+    /**
+     * Create a restaurant in FireStore for the "Choose" functionality
+     * @param id Restaurant id
+     * @return Boolean
+     */
     @SuppressWarnings("SameReturnValue")
     public static boolean createRestaurantInFireStoreForChoose(String id){
         if (!checkIfRestaurantExists(id)){
@@ -55,6 +68,10 @@ public class RestaurantHelper {
         return true;
     }
 
+    /**
+     * Create a restaurant in FireStore for the "Like" functionality
+     * @param id Restaurant id
+     */
     public static void createRestaurantInFireStoreForLike(String id){
         if (!checkIfRestaurantExists(id)){
             RestaurantHelper.createRestaurant(id);
@@ -69,10 +86,19 @@ public class RestaurantHelper {
 
     // --- DELETE ---
 
+    /**
+     * Delete a restaurant in FireStore
+     * @param id Restaurant id
+     */
     private static void deleteRestaurant(String id) {
         RestaurantHelper.getRestaurantsCollection().document(id).delete();
     }
 
+    /**
+     * Delete a restaurant in FireStore for the "Choose" functionality
+     * @param id Restaurant id
+     * @return Boolean
+     */
     @SuppressWarnings("SameReturnValue")
     public static boolean deleteRestaurantInFireStoreForChoose(String id){
         if (checkIfRestaurantExists(id)){
@@ -85,6 +111,10 @@ public class RestaurantHelper {
         return false;
     }
 
+    /**
+     * Delete a restaurant in FireStore for the "Like" functionality
+     * @param id Restaurant id
+     */
     public static void deleteRestaurantInFireStoreForLike(String id){
         if (checkIfRestaurantExists(id)){
             RestaurantHelper.deleteRestaurant(id);
@@ -95,19 +125,34 @@ public class RestaurantHelper {
 
     // --- LIKE FUNCTION ---
 
+    /**
+     * Add a user to a restaurant "Like" list in FireStore
+     * @param uid User id
+     * @param id Restaurant id
+     */
     private static void likeRestaurant(String uid, String id){
         User userToCreate = new User(uid);
         RestaurantHelper.getRestaurantsCollection().document(id).collection("likes").document(uid).set(userToCreate);
     }
 
+    /**
+     * Delete a user to a restaurant "Like" list in FireStore
+     * @param uid User id
+     * @param id Restaurant id
+     */
     private static void dislikeRestaurant(String uid, String id){
         RestaurantHelper.getRestaurantsCollection().document(id).collection("likes").document(uid).delete();
     }
 
     // --- CHOOSE FUNCTION ---
 
+    /**
+     * Add a user to a restaurant "Choose" list in FireStore
+     * @param uid User id
+     * @param id Restaurant id
+     */
     private static void chooseRestaurant(String uid, String id){
-        User userToCreate = new User(uid, Objects.requireNonNull(getCurrentUser()).getDisplayName());
+        User userToCreate = new User(uid, Objects.requireNonNull(UserHelper.getCurrentUser()).getDisplayName());
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);
@@ -115,6 +160,11 @@ public class RestaurantHelper {
         RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").document(uid).set(userToCreate);
     }
 
+    /**
+     * Delete a user to a restaurant "Choose" list in FireStore
+     * @param uid User id
+     * @param id Restaurant id
+     */
     private static void unchooseRestaurant(String uid, String id){
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -126,7 +176,11 @@ public class RestaurantHelper {
     // --- CHECK FUNCTION ---
 
 
-
+    /**
+     * Check if a user has already chosen the given restaurant and call the appropriate functions in consequence
+     * @param uid User id
+     * @param id Restaurant id
+     */
     private static void checkIfUserDocumentExistsForChosen(String uid, String id){
 
         Date date = Calendar.getInstance().getTime();
@@ -151,6 +205,10 @@ public class RestaurantHelper {
         });
     }
 
+    /**
+     * Check if a given restaurant exists in the FireStore database
+     * @param id Restaurant id
+     */
     private static Boolean checkIfRestaurantExists(String id){
         Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).get();
         final Boolean[] bool2 = new Boolean[1];
@@ -159,6 +217,12 @@ public class RestaurantHelper {
         return bool2[0];
     }
 
+    /**
+     * Check if the given has already liked a restaurant and update the Checkbox of its corresponding DetailActivity
+     * @param uid User id
+     * @param id Restaurant id
+     * @param cb_like Checkbox from DetailActivity
+     */
     public static void checkIfDocumentExistsForLike(String uid, String id, CheckBox cb_like){
         Task<DocumentSnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("likes").document(uid).get();
         final Boolean[] bool = new Boolean[1];
@@ -170,7 +234,12 @@ public class RestaurantHelper {
         });
     }
 
-
+    /**
+     * Update workmates UI elements of a RestaurantList Fragment item according to the FireStore database
+     * @param id Restaurant id
+     * @param workmatesTv Workmates TextView
+     * @param workmatesIc Workmates Icon
+     */
     @SuppressLint("DefaultLocale")
     public static void checkNumberOfWorkmates(String id, TextView workmatesTv, ImageView workmatesIc){
 
@@ -192,6 +261,4 @@ public class RestaurantHelper {
         });
     }
 
-    @Nullable
-    private static FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
 }

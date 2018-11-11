@@ -23,10 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Class used to handle responses from requests to Google Places API
+ **/
 public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
     private String googlePlacesData;
-    private GoogleMap mMap;
     private double latitude;
     private double longitude;
     private Integer tabrequest;
@@ -36,11 +38,10 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
     @Override
     protected String doInBackground(Object... objects){
-        mMap = (GoogleMap)objects[0];
-        url = (String)objects[1];
-        tabrequest = (Integer)objects[2];
-        latitude = (double)objects[3];
-        longitude = (double)objects[4];
+        url = (String)objects[0];
+        tabrequest = (Integer)objects[1];
+        latitude = (double)objects[2];
+        longitude = (double)objects[3];
         DownloadURL downloadURL = new DownloadURL();
         try {
             googlePlacesData = downloadURL.readUrl(url);
@@ -59,6 +60,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
         nearbyPlaceList = parser.parse(s);
         Log.d("nearbyplacesdata","called parse method");
         showNearbyPlaces(nearbyPlaceList);
+        // If tabrequest value equals 3, it means that the last request is complete and the restaurants list can be used by the fragments
         if(tabrequest == 3) {
             Set<Restaurant> hs = new HashSet<>(restaurantListData);
             restaurantListData.clear();
@@ -66,12 +68,18 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
             Collections.sort(restaurantListData, (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
 
+            // Broadcast sent to the RestaurantListFragment to inform it of the restaurants list update
             Intent intent = new Intent("com.action.test");
             LocalBroadcastManager manager = LocalBroadcastManager.getInstance(GetAppContext.getContext());
             manager.sendBroadcast(intent);
         }
     }
 
+    /**
+     * Invoked on the UI thread after the background computation finishes
+     * Will parse the result of a request into Restaurant objects and set their corresponding marker on the MapFragment's map
+     * @param nearbyPlaceList The result of the background computation
+     */
     private void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList)
     {
         if(restaurantListData == null) {
@@ -80,6 +88,8 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
         for (int i = 0; i < nearbyPlaceList.size(); i++) {
             HashMap<String, String> googlePlace = nearbyPlaceList.get(i);
             if(!googlePlace.isEmpty()){
+
+                // ------- MARKER -----------
                 MarkerOptions markerOptions = new MarkerOptions();
                 String placeName = googlePlace.get("place_name");
                 String vicinity = googlePlace.get("vicinity");
@@ -93,36 +103,32 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
                 markerOptions.snippet(id);
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
 
-                Marker marker = mMap.addMarker(markerOptions);
+                // ------- RESTAURANT OBJECT CREATION -----------
+                Restaurant restaurant = new Restaurant();
+                restaurant.setAddress(googlePlace.get("vicinity"));
+                restaurant.setId(googlePlace.get("id"));
+                restaurant.setName(googlePlace.get("place_name"));
+                restaurant.setOpen(Boolean.parseBoolean(googlePlace.get("opening")));
+                if(!googlePlace.get("rating").isEmpty() && googlePlace.get("rating") != null) restaurant.setRating(Float.parseFloat(googlePlace.get("rating")));
+                restaurant.setLatLng(latLng);
 
-                if(!googlePlace.isEmpty()) {
-                    Restaurant restaurant = new Restaurant();
-                    restaurant.setAddress(googlePlace.get("vicinity"));
-                    restaurant.setId(googlePlace.get("id"));
-                    restaurant.setName(googlePlace.get("place_name"));
-                    restaurant.setOpen(Boolean.parseBoolean(googlePlace.get("opening")));
-                    if(!googlePlace.get("rating").isEmpty() && googlePlace.get("rating") != null) restaurant.setRating(Float.parseFloat(googlePlace.get("rating")));
-                    restaurant.setLatLng(latLng);
-                    restaurant.setMarker(marker);
+                // Calculating the distance between the user and the restaurant
+                Location locationA = new Location("point A");
 
-                    Location locationA = new Location("point A");
+                locationA.setLatitude(latitude);
+                locationA.setLongitude(longitude);
 
-                    locationA.setLatitude(latitude);
-                    locationA.setLongitude(longitude);
+                Location locationB = new Location("point B");
 
-                    Location locationB = new Location("point B");
+                locationB.setLatitude(lat);
+                locationB.setLongitude(lng);
 
-                    locationB.setLatitude(lat);
-                    locationB.setLongitude(lng);
+                restaurant.setDistance(locationA.distanceTo(locationB));
 
-                    restaurant.setDistance(locationA.distanceTo(locationB));
+                // Call the method to update the marker color based on the FireStore database
+                MapFragment.setMarkerIcon(restaurant);
 
-                    MapFragment.setMarkerIcon(restaurant);
-
-                    restaurantListData.add(restaurant);
-
-                }
-
+                restaurantListData.add(restaurant);
             }
         }
     }

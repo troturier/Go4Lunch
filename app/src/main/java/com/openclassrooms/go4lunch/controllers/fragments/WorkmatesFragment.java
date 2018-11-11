@@ -27,6 +27,7 @@ import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.helpers.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.ItemClickSupport;
+import com.openclassrooms.go4lunch.utils.Toolbox;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import butterknife.ButterKnife;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.openclassrooms.go4lunch.controllers.activities.MainActivity.mGoogleApiClient;
+import static com.openclassrooms.go4lunch.utils.Toolbox.getCurrentDate;
 import static java.lang.String.format;
 
 /**
@@ -90,10 +92,7 @@ public class WorkmatesFragment extends Fragment {
 
                 // We then classify the retrieved users in the two previously created lists
                 for (User user : mUsers) {
-                    // Retrieving the current date
-                    Date date = Calendar.getInstance().getTime();
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    String mDate = format.format(date);
+                    String mDate = getCurrentDate();
 
                     Task<DocumentSnapshot> doc2 = UserHelper.getUsersCollection().document(Objects.requireNonNull(user.getUid())).collection("dates").document(mDate).get();
                     final Boolean[] bool = new Boolean[1];
@@ -137,10 +136,7 @@ public class WorkmatesFragment extends Fragment {
     private void configureOnClickRecyclerView() {
         ItemClickSupport.addTo(recyclerView, R.layout.fragment_workmates_recycler_view_item)
                 .setOnItemClickListener((recyclerView, position, v) -> {
-                    // Retrieving the current date
-                    Date date = Calendar.getInstance().getTime();
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    String mDate = format.format(date);
+                    String mDate = getCurrentDate();
 
                     Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(mWorkmatesAdapter.getUser(position).getUid())).collection("dates").document(mDate).get();
                     final Boolean[] bool = new Boolean[1];

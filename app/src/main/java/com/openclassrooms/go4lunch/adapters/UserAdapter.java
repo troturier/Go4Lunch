@@ -13,6 +13,9 @@ import com.openclassrooms.go4lunch.views.UserViewHolder;
 
 import java.util.List;
 
+/**
+ * Adapter used to manage User objects for the DetailActivity's RecyclerView
+ */
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     private List<User> mUsers;

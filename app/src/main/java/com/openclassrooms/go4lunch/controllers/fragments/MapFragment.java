@@ -37,6 +37,7 @@ import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
+import com.openclassrooms.go4lunch.utils.Toolbox;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -47,7 +48,9 @@ import java.util.Objects;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
-
+/**
+ * Fragment containing the map view
+ */
 @SuppressWarnings("FieldCanBeLocal")
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, EasyPermissions.PermissionCallbacks {
 
@@ -164,7 +167,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                         if (location != null) {
                             mFusedLocationClient.getLastLocation()
                                     .addOnSuccessListener(getActivity(), location2 -> {
-                                        // Got last known location. In some rare situations this can be null.
+                                        // Get last known location. In some rare situations this can be null.
                                         if (location2 != null) {
 
                                             CameraPosition user = CameraPosition.builder().target(new LatLng(location2.getLatitude(), location2.getLongitude())).zoom(16).bearing(0).build();
@@ -175,19 +178,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
                                             Integer tabRequest = 1;
 
+                                            // Creating and executing NearbySearch request
+
                                             // -------------- RESTAURANT ------------------- //
 
                                             String restaurant = "restaurant";
 
                                             String url = getUrl(latitude, longitude, restaurant);
 
-                                            Object dataTransfer[] = new Object[5];
+                                            Object dataTransfer[] = new Object[4];
 
-                                            dataTransfer[0] = mGoogleMap;
-                                            dataTransfer[1] = url;
-                                            dataTransfer[2] = tabRequest;
-                                            dataTransfer[3] = latitude;
-                                            dataTransfer[4] = longitude;
+                                            dataTransfer[0] = url;
+                                            dataTransfer[1] = tabRequest;
+                                            dataTransfer[2] = latitude;
+                                            dataTransfer[3] = longitude;
 
                                             GetNearbyPlacesData getNearbyPlacesData1 = new GetNearbyPlacesData();
 
@@ -199,32 +203,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
                                             url = getUrl(latitude, longitude, meal_takeaway);
 
-                                            Object dataTransfer2[] = new Object[5];
+                                            Object dataTransfer2[] = new Object[4];
 
-                                            dataTransfer2[0] = mGoogleMap;
-                                            dataTransfer2[1] = url;
-                                            dataTransfer2[2] = tabRequest;
-                                            dataTransfer2[3] = latitude;
-                                            dataTransfer2[4] = longitude;
+                                            dataTransfer2[0] = url;
+                                            dataTransfer2[1] = tabRequest;
+                                            dataTransfer2[2] = latitude;
+                                            dataTransfer2[3] = longitude;
 
                                             GetNearbyPlacesData getNearbyPlacesData2 = new GetNearbyPlacesData();
 
                                             getNearbyPlacesData2.execute(dataTransfer2);
 
                                             // -------------- MEAL DELIVERY ------------------- //
+
                                             String meal_delivery = "meal_delivery";
 
                                             url = getUrl(latitude, longitude, meal_delivery);
 
-                                            Object dataTransfer3[] = new Object[5];
+                                            Object dataTransfer3[] = new Object[4];
 
                                             tabRequest = 3;
 
-                                            dataTransfer3[0] = mGoogleMap;
-                                            dataTransfer3[1] = url;
-                                            dataTransfer3[2] = tabRequest;
-                                            dataTransfer3[3] = latitude;
-                                            dataTransfer3[4] = longitude;
+                                            dataTransfer3[0] = url;
+                                            dataTransfer3[1] = tabRequest;
+                                            dataTransfer3[2] = latitude;
+                                            dataTransfer3[3] = longitude;
 
                                             GetNearbyPlacesData getNearbyPlacesData3 = new GetNearbyPlacesData();
 
@@ -240,6 +243,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         }
     }
 
+    /**
+     * Will update all the markers of the GoogleMap according to a list of restaurants
+     * @param restaurantList A list of restaurants
+     */
     public  static void setMarkersIcon(List<Restaurant> restaurantList){
         MapFragment.mGoogleMap.clear();
         for (int i=0; i<restaurantList.size(); i++){
@@ -247,10 +254,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         }
     }
 
+    /**
+     * Set the icon of a marker accordingly to FireStore database
+     * @param restaurant A restaurant object
+     */
     public static void setMarkerIcon(Restaurant restaurant){
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        String mDate = Toolbox.getCurrentDate();
 
         MarkerOptions markerOptions = new MarkerOptions();
 
@@ -259,14 +268,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         markerOptions.snippet(restaurant.getId());
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_orange));
 
-        Marker marker = mGoogleMap.addMarker(markerOptions);
-
-        restaurant.setMarker(marker);
+       mGoogleMap.addMarker(markerOptions);
 
         Task<QuerySnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(restaurant.getId()).collection("dates").document(mDate).collection("users").get();
         doc.addOnCompleteListener(task -> {
             if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                restaurant.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_green));
+                // Changes the color of a marker if a user has chosen this restaurant
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_restaurant_green));
+                mGoogleMap.addMarker(markerOptions);
             }
         });
     }
@@ -282,7 +291,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         }
     }
 
-
     @SuppressLint("MissingPermission")
     @Override
     public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
@@ -292,7 +300,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
             mapView.onResume();
             mapView.getMapAsync(this);
         }
-        }
+    }
 
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms2) {
@@ -300,6 +308,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         EasyPermissions.requestPermissions(this, getString(R.string.rational_string), 456, perms);
     }
 
+    /**
+     * Generate a NearbySearch request URL
+     * @param latitude Latitude in a double object
+     * @param longitude Longitude in a double object
+     * @param nearbyPlace Type of place to search for
+     * @return NearbySearch request URL
+     */
     private String getUrl(double latitude, double longitude, String nearbyPlace)
     {
 

@@ -43,14 +43,11 @@ import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.maps.android.SphericalUtil;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.adapters.ViewPagerAdapter;
 import com.openclassrooms.go4lunch.controllers.fragments.MapFragment;
@@ -60,23 +57,18 @@ import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
+import com.openclassrooms.go4lunch.utils.Toolbox;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.graphics.Color.WHITE;
+import static com.openclassrooms.go4lunch.utils.Toolbox.findDuplicates;
+import static com.openclassrooms.go4lunch.utils.Toolbox.toBounds;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, RestaurantsListFragment.FragmentListener {
 
@@ -90,8 +82,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     //FOR DATA
     private static final int RC_SIGN_IN = 123;
-    private static final int SIGN_OUT_TASK = 10;
-    private static final int DELETE_USER_TASK = 20;
     private User currentUser;
 
     private DrawerLayout mDrawerLayout;
@@ -103,12 +93,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private static final CharacterStyle STYLE_NORMAL = new StyleSpan(Typeface.NORMAL);
 
     private Place selected_place;
-
-    // --Commented out by Inspection (10/07/2018 13:42):private Menu menu;
-
-    // --------------------
-    // LIFE CYCLE
-    // --------------------
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -124,66 +108,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .build();
 
-        //noinspection unused
         GeoDataClient mGeoDataClient = Places.getGeoDataClient(this);
 
         AuthUI.getInstance();
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(
-                menuItem -> {
+        setupNavigationDrawer();
 
-                    int id = menuItem.getItemId();
-
-                    switch (id) {
-                        case R.id.nav_logout:
-                            signOutUserFromFirebase();
-                            break;
-                        case R.id.nav_lunch:
-                            Date date = Calendar.getInstance().getTime();
-                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                            String mDate = format.format(date);
-                            Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(getCurrentUser()).getUid()).collection("dates").document(mDate).get();
-                            final Boolean[] bool = new Boolean[1];
-                            doc.addOnCompleteListener(task -> {
-                                bool[0] = Objects.requireNonNull(doc.getResult()).exists();
-                                if(bool[0]){
-                                    DocumentSnapshot document = task.getResult();
-                                    String resId = Objects.requireNonNull(document).getString("id");
-                                    Places.GeoDataApi.getPlaceById(mGoogleApiClient, resId)
-                                            .setResultCallback(places -> {
-                                                if (places.getStatus().isSuccess() && places.getCount() > 0) {
-                                                    selected_place = places.get(0);
-                                                    Intent intent = new Intent(this, DetailActivity.class);
-                                                    Bundle bundle = new Bundle();
-                                                    if (selected_place.getId() != null ) bundle.putString("place_id", selected_place.getId());
-                                                    if (selected_place.getWebsiteUri() != null )bundle.putString("place_website", selected_place.getWebsiteUri().toString());
-                                                    if (selected_place.getName() != null )bundle.putString("place_name", selected_place.getName().toString());
-                                                    if (selected_place.getPhoneNumber() != null )bundle.putString("place_phone", selected_place.getPhoneNumber().toString());
-                                                    if (selected_place.getAddress() != null )bundle.putString("place_address", selected_place.getAddress().toString());
-                                                    if (selected_place.getPlaceTypes() != null )bundle.putString("place_type", selected_place.getPlaceTypes().toString());
-                                                    intent.putExtras(bundle);
-                                                    startActivity(intent);
-                                                }
-                                            });
-                                }
-                                else {
-                                    Toast.makeText(getApplicationContext(), R.string.no_rest_chosen, Toast.LENGTH_LONG).show();
-                                }
-                            });
-                            break;
-                        case R.id.nav_settings:
-                            break;
-                        default:
-                            break;
-                    }
-
-                    mDrawerLayout.closeDrawers();
-                    return true;
-                });
-
+        // Checks if the user is connected, otherwise displays the sign-in activity
         if (!isCurrentUserLogged()) {
             startSignInActivity();
         } else {
@@ -199,13 +132,65 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             setupTabsStyle(tabLayout, viewPager);
         }
 
+        setupSearchView(mGeoDataClient);
+    }
+
+    @SuppressWarnings("SameReturnValue")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    // --------------------
+    // REST REQUESTS
+    // --------------------
+
+    /**
+     * Sign-out the current user
+     */
+    private void signOutUserFromFirebase(){
+        AuthUI.getInstance()
+                .signOut(this)
+                .addOnSuccessListener(this, aVoid -> startSignInActivity());
+    }
+
+    /**
+     * Create the current user in FireStore
+     */
+    private void createUserInFirestore(){
+        if (this.getCurrentUser() != null){
+
+            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
+            String username = this.getCurrentUser().getDisplayName();
+            String uid = this.getCurrentUser().getUid();
+
+            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+        }
+    }
+
+    // --------------------
+    // UI
+    // --------------------
+
+    /**
+     * Setup the SearchView of the MainActivity
+     * @param mGeoDataClient GeoDataClient object
+     */
+    private void setupSearchView(GeoDataClient mGeoDataClient){
         SearchView searchView = findViewById(R.id.searchView);
 
+        // Create an AutocompleteFilter for the Google PlaceAutocomplete API
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setCountry("FR")
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
                 .build();
 
+        // Resets the restaurant list once the SearchView is closed
         searchView.setOnCloseListener(() -> {
             RestaurantsListFragment.mPlaceAdapter.setPlaces(GetNearbyPlacesData.restaurantListData);
             RestaurantsListFragment.mPlaceAdapter.notifyDataSetChanged();
@@ -213,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             return false;
         });
 
-
+        // Perform an Autocomplete search once the SearchView receive an input from the user
         searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -233,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         mGeoDataClient.getAutocompletePredictions(newText, toBounds(latLng), typeFilter).addOnCompleteListener(task1 -> {
                             ArrayList<Restaurant> restaurantList = new ArrayList<>();
                             ArrayList<Restaurant> combinedList = new ArrayList<>();
+                            // Retrieve Place objects by comparing the current list of restaurants and the AutocompletePredictions results given by the API
                             for (int i = 0; i < Objects.requireNonNull(task1.getResult()).getCount(); i++) {
                                 Restaurant restaurant = new Restaurant();
                                 restaurant.setName(task1.getResult().get(i).getPrimaryText(STYLE_NORMAL).toString());
@@ -240,21 +226,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 restaurant.setId(task1.getResult().get(i).getPlaceId());
                                 restaurantList.add(restaurant);
                             }
+                            // Search in restaurant names for text occurrences based on what was entered in the SearchView
                             for (int i = 0; i < GetNearbyPlacesData.restaurantListData.size(); i++) {
                                 if(GetNearbyPlacesData.restaurantListData.get(i).getName().toLowerCase().contains(newText.toLowerCase())){
                                     restaurantList.add(GetNearbyPlacesData.restaurantListData.get(i));
                                 }
                             }
+
+                            // Combines the two lists and removes duplicates
                             combinedList.addAll(restaurantList);
                             combinedList.addAll(GetNearbyPlacesData.restaurantListData);
+
+                            // Update the two fragments
                             RestaurantsListFragment.mPlaceAdapter.setPlaces(findDuplicates(combinedList));
                             RestaurantsListFragment.mPlaceAdapter.notifyDataSetChanged();
                             MapFragment.setMarkersIcon(findDuplicates(combinedList));
-                            Log.d("AutoComp", restaurantList.toString());
+
+                            if(findDuplicates(combinedList).isEmpty()){
+                                showSnackBar(linearLayout, getString(R.string.no_results));
+                            }
                         });
                     });
-
-                    }
+                }
                 else {
                     RestaurantsListFragment.mPlaceAdapter.setPlaces(GetNearbyPlacesData.restaurantListData);
                     RestaurantsListFragment.mPlaceAdapter.notifyDataSetChanged();
@@ -265,98 +258,66 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private LatLngBounds toBounds(LatLng center) {
-        double distanceFromCenterToCorner = (double) 10000 * Math.sqrt(2.0);
-        LatLng southwestCorner =
-                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
-        LatLng northeastCorner =
-                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
-        return new LatLngBounds(southwestCorner, northeastCorner);
+    /**
+     * Setup the navigation drawer of the MainActivity
+     */
+    private void setupNavigationDrawer(){
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                menuItem -> {
+                    int id = menuItem.getItemId();
+                    switch (id) {
+                        case R.id.nav_logout:
+                            signOutUserFromFirebase();
+                            break;
+                        case R.id.nav_lunch:
+                            // Get the current date
+                            String mDate = Toolbox.getCurrentDate();
+
+                            Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(getCurrentUser()).getUid()).collection("dates").document(mDate).get();
+                            final Boolean[] bool = new Boolean[1];
+                            doc.addOnCompleteListener(task -> {
+                                bool[0] = Objects.requireNonNull(doc.getResult()).exists();
+                                if(bool[0]){
+                                    DocumentSnapshot document = task.getResult();
+                                    String resId = Objects.requireNonNull(document).getString("id");
+                                    Places.GeoDataApi.getPlaceById(mGoogleApiClient, resId)
+                                            .setResultCallback(places -> {
+                                                if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                                                    selected_place = places.get(0);
+                                                    Intent intent = prepareDetailActivity(selected_place);
+                                                    startActivity(intent);
+                                                }
+                                            });
+                                }
+                                else {
+                                    Toast.makeText(getApplicationContext(), R.string.no_rest_chosen, Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            break;
+                        case R.id.nav_settings:
+                            break;
+                        default:
+                            break;
+                    }
+                    mDrawerLayout.closeDrawers();
+                    return true;
+                });
     }
 
-    private static List<Restaurant> findDuplicates(List<Restaurant> listContainingDuplicates) {
-
-        final Set<Restaurant> setToReturn = new HashSet<>();
-        final Set<Restaurant> set1 = new HashSet<>();
-
-        for (Restaurant restaurant : listContainingDuplicates) {
-            if (!set1.add(restaurant)) {
-                setToReturn.add(restaurant);
-            }
-        }
-        List<Restaurant> restaurantList = new ArrayList<>(setToReturn);
-        Collections.sort(restaurantList, (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
-        return restaurantList;
-    }
-
-    // --------------------
-    // ACTIONS
-    // --------------------
-
-    /* @OnClick(R.id.profile_activity_button_delete)
-    public void onClickDeleteButton() {
-        new AlertDialog.Builder(this)
-                .setMessage(R.string.popup_message_confirmation_delete_account)
-                .setPositiveButton(R.string.popup_message_choice_yes, (dialogInterface, i) -> deleteUserFromFirebase())
-                .setNegativeButton(R.string.popup_message_choice_no, null)
-                .show();
-    } */
-
-    @SuppressWarnings("SameReturnValue")
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    // --------------------
-    // REST REQUESTS
-    // --------------------
-
-    private void signOutUserFromFirebase(){
-        AuthUI.getInstance()
-                .signOut(this)
-                .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
-    }
-
-    @SuppressWarnings("unused")
-    private void deleteUserFromFirebase(){
-        if (this.getCurrentUser() != null) {
-
-            //4 - We also delete user from firestore storage
-            UserHelper.deleteUser(this.currentUser.getUid()).addOnFailureListener(this.onFailureListener());
-
-            AuthUI.getInstance()
-                    .delete(this)
-                    .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(DELETE_USER_TASK));
-        }
-    }
-
-    private void createUserInFirestore(){
-
-        if (this.getCurrentUser() != null){
-
-            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
-            String username = this.getCurrentUser().getDisplayName();
-            String uid = this.getCurrentUser().getUid();
-
-            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
-        }
-    }
-
-    // --------------------
-    // UI
-    // --------------------
-
+    /**
+     * Displays a Snackbar message
+     * @param linearLayout The LinearLayout where the Snackbar should be displayed
+     * @param message The message of the Snackbar
+     */
     private void showSnackBar(LinearLayout linearLayout, String message){
         Snackbar snackbar = Snackbar.make(linearLayout, message, Snackbar.LENGTH_SHORT);
         snackbar.show();
     }
 
+    /**
+     * Update the UI with the current user's data
+     */
     private void updateUIWhenCreating(){
         if (this.getCurrentUser() != null){
 
@@ -381,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             //Update views with data
             drawerEmail.setText(email);
 
-            // 5 - Get additional data from Firestore
+            // Get additional data from Firestore
             UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(documentSnapshot -> {
                 currentUser = documentSnapshot.toObject(User.class);
                 String username = TextUtils.isEmpty(Objects.requireNonNull(currentUser).getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
@@ -390,33 +351,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin){
-        return aVoid -> {
-            switch (origin){
-                case RC_SIGN_IN:
-                    UserHelper.getUser(Objects.requireNonNull(this.getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> currentUser = documentSnapshot.toObject(User.class));
-                    this.configureToolbar();
-                    this.updateUIWhenCreating();
-
-                    viewPager = findViewById(R.id.viewpager);
-                    setupViewPager(viewPager);
-
-                    tabLayout = findViewById(R.id.tabs);
-                    tabLayout.setupWithViewPager(viewPager);
-                    setupTabsStyle(tabLayout, viewPager);
-                    break;
-                case SIGN_OUT_TASK:
-                    startSignInActivity();
-                    break;
-                case DELETE_USER_TASK:
-                    startSignInActivity();
-                    break;
-                default:
-                    break;
-            }
-        };
-    }
-
+    /**
+     * Configure the toolbar of the MainActivity
+     */
     private void configureToolbar(){
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -430,11 +367,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     // --------------------
+    // DETAIL ACTIVITY
+    // --------------------
+
+    /**
+     * Prepare the DetailActivity for a given place
+     * @param place A restaurant
+     * @return A DetailActivity intent
+     */
+    public static Intent prepareDetailActivity(Place place){
+        Intent intent = new Intent(GetAppContext.getContext(), DetailActivity.class);
+        Bundle bundle = new Bundle();
+        if (place.getId() != null ) bundle.putString("place_id", place.getId());
+        if (place.getWebsiteUri() != null )bundle.putString("place_website", Objects.requireNonNull(place.getWebsiteUri()).toString());
+        if (place.getName() != null )bundle.putString("place_name", place.getName().toString());
+        if (place.getPhoneNumber() != null )bundle.putString("place_phone", Objects.requireNonNull(place.getPhoneNumber()).toString());
+        if (place.getAddress() != null )bundle.putString("place_address", Objects.requireNonNull(place.getAddress()).toString());
+        if (place.getPlaceTypes() != null )bundle.putString("place_type", place.getPlaceTypes().toString());
+        intent.putExtras(bundle);
+        return intent;
+    }
+
+    // --------------------
     // ERROR HANDLER
     // --------------------
 
+    /**
+     * Error events handler
+     * @return Error message
+     */
     private OnFailureListener onFailureListener(){
-        // return e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
         return e -> Log.d("Failure", "Error", e);
     }
 
@@ -442,6 +404,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     // ON RESULT HANDLER
     // --------------------
 
+    /**
+     * Update the UI according to the sign-in activity result
+     * @param requestCode Request Code (ex: 123)
+     * @param resultCode Could be either "CANCELED" OR "OK"
+     * @param data Sign-in data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -472,6 +440,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     // SIGN-IN ACTIVITY
     // --------------------
 
+    /**
+     * Start the AuthUI sign-in Activity
+     */
     private void startSignInActivity(){
         startActivityForResult(AuthUI.getInstance()
                                 .createSignInIntentBuilder()
@@ -491,6 +462,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     // UTILS
     // --------------------
 
+    /**
+     * Display a message according to sign-in response
+     * @param requestCode Request Code
+     * @param resultCode Result Code
+     * @param data Sign-in data
+     */
     private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
 
         IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -520,6 +497,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     // TABS
     // --------------------
 
+    /**
+     * Setup the different fragment of the ViewPager
+     * @param viewPager ViewPager object
+     */
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new com.openclassrooms.go4lunch.controllers.fragments.MapFragment(), "Map View");
@@ -529,18 +510,26 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         viewPager.setOffscreenPageLimit(3);
     }
 
+    /**
+     * Update the style of the different tabs of the ViewPager
+     * @param tabLayout A TabLayout
+     * @param viewPager A ViewPager
+     */
     private void setupTabsStyle(TabLayout tabLayout, ViewPager viewPager) {
+        // MAP VIEW
         Objects.requireNonNull(tabLayout.getTabAt(0)).setIcon(R.drawable.ic_map);
         Objects.requireNonNull(tabLayout.getTabAt(0)).setText(R.string.map_view_title);
 
+        // LIST VIEW
         Objects.requireNonNull(tabLayout.getTabAt(1)).setIcon(R.drawable.ic_view_list);
         Objects.requireNonNull(tabLayout.getTabAt(1)).setText(R.string.list_view_title);
 
+        // WORKMATES
         Objects.requireNonNull(tabLayout.getTabAt(2)).setIcon(R.drawable.ic_workmates);
         Objects.requireNonNull(tabLayout.getTabAt(2)).setText(R.string.workmates_title);
 
+        // Change the color of the current tab
         Objects.requireNonNull(Objects.requireNonNull(tabLayout.getTabAt(tabLayout.getSelectedTabPosition())).getIcon()).setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
-
 
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager) {
             @Override

@@ -16,23 +16,26 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.support.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
 import static com.openclassrooms.go4lunch.controllers.fragments.RestaurantsListFragment.mGoogleApiClient;
 
-public class GetPlacesData extends AsyncTask<Object, String, String> {
+/**
+ * Class used to retrieve data of a Place object and in particular here its cover photo
+ */
+public class GetPlaceData extends AsyncTask<Object, String, String> {
 
     private String googlePlacesData;
     private String placeId;
-    private Boolean openNow;
     @SuppressWarnings("FieldCanBeLocal")
     private String url;
 
     public interface AsyncResponse {
-        void processFinish(String output, Boolean open);
+        void processFinish(String output);
     }
 
     private AsyncResponse delegate;
 
-    public GetPlacesData(AsyncResponse delegate){
+    public GetPlaceData(AsyncResponse delegate){
         this.delegate = delegate;
     }
 
@@ -59,10 +62,10 @@ public class GetPlacesData extends AsyncTask<Object, String, String> {
         Log.d("dataPlace","called parse method");
         getData(placeList);
         if (placeId != null){
-            delegate.processFinish(placeId, openNow);
+            delegate.processFinish(placeId);
         }
         else {
-            delegate.processFinish(null, false);
+            delegate.processFinish(null);
         }
     }
 
@@ -73,17 +76,14 @@ public class GetPlacesData extends AsyncTask<Object, String, String> {
 
             String id = googlePlace.get("id");
 
-            Boolean open = Boolean.parseBoolean(googlePlace.get("open_now"));
-
             Log.d("dataPlace", "ID RETRIEVED : " + id);
 
             placeId = id;
-            openNow = open;
         }
     }
 
     /**
-     * Function to retrieve the photo of a given restaurant
+     * Method to retrieve the photo of a given restaurant
      * @param id Place id
      * @param iv ImageView holder
      * @param glideP RequestManager
@@ -110,7 +110,11 @@ public class GetPlacesData extends AsyncTask<Object, String, String> {
                     photoMetadataBuffer.release();
                 }
                 else {
-                    iv.setImageResource(R.drawable.background_image_r);
+                    try {
+                        runOnUiThread(() -> iv.setImageResource(R.drawable.background_image_r));
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
 
                 return null;
@@ -123,7 +127,11 @@ public class GetPlacesData extends AsyncTask<Object, String, String> {
                     super.onPostExecute(aVoid);
                 }
                 else{
-                    iv.setImageResource(R.drawable.background_image_r);
+                    try {
+                        runOnUiThread(() -> iv.setImageResource(R.drawable.background_image_r));
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
             }
         }.execute();

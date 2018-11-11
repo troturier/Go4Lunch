@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-
+/**
+ * Class mainly used to retrieve data from a particular Place object and more precisely in GetPlaceData to get its cover photo
+ */
 class PlaceDataParser {
 
     private HashMap<String, String> getPlace(JSONObject googlePlaceJson)
@@ -19,7 +21,6 @@ class PlaceDataParser {
         HashMap<String, String> googlePlaceMap = new HashMap<>();
 
         String id="";
-        Boolean openNow = null;
 
         Log.d("DataParser","jsonobject ="+googlePlaceJson.toString());
 
@@ -28,13 +29,8 @@ class PlaceDataParser {
             if(!googlePlaceJson.isNull("place_id")) {
                 id = googlePlaceJson.getString("place_id");
             }
-            if(!googlePlaceJson.isNull("opening_hours")) {
-                JSONObject opening_hours = googlePlaceJson.getJSONObject("opening_hours");
-                openNow = opening_hours.getBoolean("open_now");
-            }
 
             googlePlaceMap.put("id", id);
-            googlePlaceMap.put("open_now", String.valueOf(openNow));
         }
         catch (JSONException e) {
             e.printStackTrace();

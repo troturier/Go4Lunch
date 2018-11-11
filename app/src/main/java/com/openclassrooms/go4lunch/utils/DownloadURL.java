@@ -9,8 +9,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Class used for reading content from URLs
+ */
 class DownloadURL {
 
+    /**
+     * Read a given URL and return the response of the query as a String object
+     * @param myUrl URL
+     * @return String object containing the response
+     * @throws IOException Exception
+     */
     String readUrl(String myUrl) throws IOException
     {
         String data = "";

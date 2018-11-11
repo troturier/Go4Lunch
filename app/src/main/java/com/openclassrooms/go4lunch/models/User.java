@@ -2,6 +2,9 @@ package com.openclassrooms.go4lunch.models;
 
 import android.support.annotation.Nullable;
 
+/**
+ * Model used for User objects
+ */
 public class User {
 
     private String uid;
@@ -34,9 +37,4 @@ public class User {
     public String getUrlPicture() {
         return urlPicture;
     }
-
-    // --- SETTERS ---
-    // public void setUsername(String username) { this.username = username; }
-    // public void setUid(String uid) { this.uid = uid; }
-    // public void setUrlPicture(@Nullable String urlPicture) { this.urlPicture = urlPicture; }
 }

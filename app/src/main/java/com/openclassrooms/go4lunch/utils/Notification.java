@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -20,7 +19,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.openclassrooms.go4lunch.R;
-import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
+import com.openclassrooms.go4lunch.controllers.activities.MainActivity;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.helpers.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
@@ -36,6 +35,9 @@ import java.util.Objects;
 import static com.openclassrooms.go4lunch.controllers.activities.MainActivity.mGoogleApiClient;
 import static com.openclassrooms.go4lunch.helpers.UserHelper.getCurrentUser;
 
+/***
+ * Class used to display a notification to the user when he receives a message from the FCM
+ */
 public class Notification extends FirebaseMessagingService {
 
     @Override
@@ -46,10 +48,14 @@ public class Notification extends FirebaseMessagingService {
         }
     }
 
+    /**
+     * Displays a notification to the user including his choice for the restaurant of the day and the list of colleagues joining him
+     */
     public static void createNotification (){
 
         createNotificationChannel();
 
+        // Make sure the GoogleApiClient is not null
         if(mGoogleApiClient == null){
             mGoogleApiClient = new GoogleApiClient
                     .Builder(GetAppContext.getContext())
@@ -59,9 +65,12 @@ public class Notification extends FirebaseMessagingService {
                     .build();
         }
 
+        // Get the current date
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String mDate = format.format(date);
+
+        // Search the database to see if the user has chosen a restaurant
         Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(Objects.requireNonNull(getCurrentUser()).getUid()).collection("dates").document(mDate).get();
         final Boolean[] bool = new Boolean[1];
         doc.addOnCompleteListener(task -> {
@@ -80,6 +89,7 @@ public class Notification extends FirebaseMessagingService {
 
                                 CollectionReference path = RestaurantHelper.getRestaurantsCollection().document(places.get(0).getId()).collection("dates").document(mDate).collection("users");
 
+                                // Performs a search to see if other users have chosen the same restaurant
                                 Task<QuerySnapshot> docUsers = path.get();
                                 docUsers.addOnCompleteListener(taskUsers -> {
                                     if (taskUsers.isSuccessful()) {
@@ -103,19 +113,13 @@ public class Notification extends FirebaseMessagingService {
                                             usersJoining[0] = GetAppContext.getContext().getString(R.string.nobody_joined);
                                         }
 
-                                        Intent intent = new Intent(GetAppContext.getContext(), DetailActivity.class);
+                                        // Prepares action to perform at the click of notification: start the "Detail" activity  for the restaurant in question
+                                        Intent intent = MainActivity.prepareDetailActivity(places.get(0));
                                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        Bundle bundle = new Bundle();
-                                        if (places.get(0).getId() != null ) bundle.putString("place_id", places.get(0).getId());
-                                        if (places.get(0).getWebsiteUri() != null )bundle.putString("place_website", Objects.requireNonNull(places.get(0).getWebsiteUri()).toString());
-                                        if (places.get(0).getName() != null )bundle.putString("place_name", places.get(0).getName().toString());
-                                        if (places.get(0).getPhoneNumber() != null )bundle.putString("place_phone", Objects.requireNonNull(places.get(0).getPhoneNumber()).toString());
-                                        if (places.get(0).getAddress() != null )bundle.putString("place_address", Objects.requireNonNull(places.get(0).getAddress()).toString());
-                                        if (places.get(0).getPlaceTypes() != null )bundle.putString("place_type", places.get(0).getPlaceTypes().toString());
-                                        intent.putExtras(bundle);
 
                                         PendingIntent pendingIntent = PendingIntent.getActivity(GetAppContext.getContext(), 0, intent, 0);
 
+                                        // Building the notification which will be displayed
                                         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(GetAppContext.getContext(), "1")
                                                 .setSmallIcon(R.drawable.ic_stat_name)
                                                 .setContentTitle("Go4Lunch")
@@ -127,10 +131,7 @@ public class Notification extends FirebaseMessagingService {
                                                 .setAutoCancel(true);
 
                                         NotificationManager notificationManager = (NotificationManager) GetAppContext.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-
-                                        // notificationId is a unique int for each notification that you must define
                                         Objects.requireNonNull(notificationManager).notify(1, mBuilder.build());
-
                                     }
                                 });
                             }
@@ -139,9 +140,11 @@ public class Notification extends FirebaseMessagingService {
         });
     }
 
+    /**
+     * Create the NotificationChannel, but only on API 26+
+     * because the NotificationChannel class is new and not in the support library
+     */
     private static void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Go4Lunch";
             String description = "Go4Lunch daily notification";

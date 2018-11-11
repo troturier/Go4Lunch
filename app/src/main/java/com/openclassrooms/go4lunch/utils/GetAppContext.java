@@ -3,6 +3,9 @@ package com.openclassrooms.go4lunch.utils;
 import android.app.Application;
 import android.content.Context;
 
+/**
+ * Class used to access the context of the application at any point in the code
+ */
 public class GetAppContext extends Application {
     private static GetAppContext instance;
 

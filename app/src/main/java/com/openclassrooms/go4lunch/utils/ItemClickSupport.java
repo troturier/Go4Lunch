@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 /**
- * Class used when an user clicks on an article
+ * Class used when an user clicks on a restaurant
  */
 public class ItemClickSupport {
     private final RecyclerView mRecyclerView;

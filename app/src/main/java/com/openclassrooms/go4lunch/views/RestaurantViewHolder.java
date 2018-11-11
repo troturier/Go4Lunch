@@ -10,13 +10,16 @@ import com.bumptech.glide.RequestManager;
 import com.openclassrooms.go4lunch.R;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.Restaurant;
-import com.openclassrooms.go4lunch.utils.GetPlacesData;
+import com.openclassrooms.go4lunch.utils.GetPlaceData;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.graphics.Color.RED;
 
+/**
+ * Class used to create a new RecyclerView item of RestaurantsListFragment
+ */
 public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
     // FOR DESIGN
@@ -48,10 +51,11 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
     @SuppressLint("DefaultLocale")
     public void updateWithResult(Restaurant place, RequestManager glideP){
-
+        // Get the number of colleagues who have chosen this restaurant
         RestaurantHelper.checkNumberOfWorkmates(place.getId(), workmatesTv, workmatesIc);
 
-        GetPlacesData.getPhotos(place.getId(), resIv, glideP);
+        // Get the photo of the restaurant
+        GetPlaceData.getPhotos(place.getId(), resIv, glideP);
 
         name.setText(place.getName());
         CharSequence addressString = place.getAddress();
@@ -61,7 +65,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
         String dist;
         Float distFloat = place.getDistance();
-
+        // Convert the distance to the restaurant in kilometers if it exceeds 1000m
         if(place.getDistance() > 1000){
             distFloat = distFloat/1000;
             dist = String.format("%.1f", distFloat);
@@ -73,6 +77,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             distance.setText(String.format("%sm", dist));
         }
 
+        // Displays if the restaurant is open at the moment
         if(place.getOpen()){
             opening.setText(R.string.open);
         }
@@ -81,6 +86,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             opening.setTextColor(RED);
         }
 
+        // Shows a number of stars based on the restaurant's rating
         if(place.getRating() != null){
             float rating = place.getRating();
             if (rating > 1) {

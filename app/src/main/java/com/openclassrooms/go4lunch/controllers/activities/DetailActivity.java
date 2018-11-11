@@ -26,7 +26,7 @@ import com.openclassrooms.go4lunch.adapters.UserAdapter;
 import com.openclassrooms.go4lunch.helpers.RestaurantHelper;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
-import com.openclassrooms.go4lunch.utils.GetPlacesData;
+import com.openclassrooms.go4lunch.utils.Toolbox;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import static com.openclassrooms.go4lunch.helpers.UserHelper.getCurrentUser;
+import static com.openclassrooms.go4lunch.utils.GetPlaceData.getPhotos;
 
 /**
  * Class relating to the "Detail" activity of a place
@@ -116,10 +117,11 @@ public class DetailActivity extends AppCompatActivity {
         // ImageView holder for the place picture
         ImageView imageView = findViewById(R.id.detail_photo);
         // Retrieving the place picture and loading it into the ImageView
-        GetPlacesData.getPhotos(id, imageView, Glide.with(this));
+        getPhotos(id, imageView, Glide.with(this));
 
+        url = "";
         // Retrieving place website url from the intents
-        url = intent.getStringExtra("place_website");
+        if(intent.getStringExtra("place_website") != null) url = intent.getStringExtra("place_website");
 
         // Retrieving place phone number from the intents
         phone_number = intent.getStringExtra("place_phone");
@@ -197,11 +199,14 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks in the database if the user has chosen the concerned restaurant and displayed the floating action button accordingly
+     * @param uid User id
+     * @param id Restaurant id
+     * @param fab FloatingActionButton of the activity
+     */
     private void checkIfDocumentExistsForChosen(String uid, String id, FloatingActionButton fab){
-
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        String mDate = Toolbox.getCurrentDate();
         //noinspection MismatchedReadAndWriteOfArray
         final Boolean[] resSelected = {false};
 

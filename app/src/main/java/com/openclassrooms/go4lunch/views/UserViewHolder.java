@@ -19,6 +19,9 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * Class used to create a new RecyclerView item of DetailActivity
+ */
 public class UserViewHolder extends RecyclerView.ViewHolder{
 
     // FOR DESIGN
