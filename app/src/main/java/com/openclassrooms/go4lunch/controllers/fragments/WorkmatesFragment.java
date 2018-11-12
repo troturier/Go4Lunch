@@ -27,14 +27,9 @@ import com.openclassrooms.go4lunch.controllers.activities.DetailActivity;
 import com.openclassrooms.go4lunch.helpers.UserHelper;
 import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.ItemClickSupport;
-import com.openclassrooms.go4lunch.utils.Toolbox;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -73,7 +68,7 @@ public class WorkmatesFragment extends Fragment {
         // Path that will be used for requests to FireStore
         CollectionReference path = UserHelper.getUsersCollection();
 
-        // First, we retrieve the list of all the users present on FIreStore
+        // First, we retrieve the list of all the users present on FireStore
         Task<QuerySnapshot> doc = path.get();
         doc.addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

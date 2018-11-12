@@ -5,7 +5,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -44,6 +46,8 @@ public class Notification extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         if (remoteMessage.getNotification() != null) {
             // Show notification after received message
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(GetAppContext.getContext());
+            if(prefs.getBoolean("notifications_daily_message", true))
             createNotification();
         }
     }

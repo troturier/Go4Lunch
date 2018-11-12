@@ -13,11 +13,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.models.User;
+import com.openclassrooms.go4lunch.utils.Toolbox;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -153,9 +150,7 @@ public class RestaurantHelper {
      */
     private static void chooseRestaurant(String uid, String id){
         User userToCreate = new User(uid, Objects.requireNonNull(UserHelper.getCurrentUser()).getDisplayName());
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        String mDate = Toolbox.getCurrentDate();
 
         RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").document(uid).set(userToCreate);
     }
@@ -166,9 +161,7 @@ public class RestaurantHelper {
      * @param id Restaurant id
      */
     private static void unchooseRestaurant(String uid, String id){
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        String mDate = Toolbox.getCurrentDate();
 
         RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").document(uid).delete();
     }
@@ -183,9 +176,7 @@ public class RestaurantHelper {
      */
     private static void checkIfUserDocumentExistsForChosen(String uid, String id){
 
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        String mDate = Toolbox.getCurrentDate();
 
         Task<DocumentSnapshot> doc = UserHelper.getUsersCollection().document(uid).collection("dates").document(mDate).get();
         final Boolean[] bool = new Boolean[1];
@@ -243,9 +234,7 @@ public class RestaurantHelper {
     @SuppressLint("DefaultLocale")
     public static void checkNumberOfWorkmates(String id, TextView workmatesTv, ImageView workmatesIc){
 
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        String mDate = Toolbox.getCurrentDate();
 
         Task<QuerySnapshot> doc = RestaurantHelper.getRestaurantsCollection().document(id).collection("dates").document(mDate).collection("users").get();
         doc.addOnCompleteListener(task -> {

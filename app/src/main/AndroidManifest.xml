@@ -22,18 +22,18 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CALL_PHONE"
+    <uses-permission
+        android:name="android.permission.CALL_PHONE"
         tools:ignore="PermissionImpliesUnsupportedHardware" />
     <uses-permission android:name="android.permission.INTERNET" />
-
 
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
 
     <application
-        android:allowBackup="true"
         android:name=".utils.GetAppContext"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -46,23 +46,23 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="notification" />
-                <category android:name="android.intent.category.DEFAULT"/>
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-6043597290481315~3043046332"/>
+            android:value="ca-app-pub-6043597290481315~3043046332" />
 
         <!-- NOTIFICATION SERVICE -->
         <service
             android:name=".utils.Notification"
             tools:ignore="ExportedService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <!--
@@ -80,12 +80,16 @@
         <activity
             android:name=".controllers.activities.DetailActivity"
             android:label="@string/title_activity_detail"
-            android:theme="@style/DetailActivityTheme"/>
+            android:theme="@style/DetailActivityTheme" />
         <activity android:name=".controllers.activities.WebViewActivity" />
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
+
+        <activity
+            android:name=".controllers.activities.SettingsActivity"
+            android:label="@string/title_activity_settings" />
     </application>
 
 </manifest>

@@ -40,4 +40,7 @@
     <string name="people_joining_you">People joining you :</string>
     <string name="nobody_joined">No colleagues have joined you for the moment</string>
     <string name="no_results">No results for the current search</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_title_new_message_notifications">Daily notifications</string>
 </resources>

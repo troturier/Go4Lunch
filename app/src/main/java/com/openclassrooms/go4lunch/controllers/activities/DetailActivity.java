@@ -28,12 +28,8 @@ import com.openclassrooms.go4lunch.models.User;
 import com.openclassrooms.go4lunch.utils.GetAppContext;
 import com.openclassrooms.go4lunch.utils.Toolbox;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import static com.openclassrooms.go4lunch.helpers.UserHelper.getCurrentUser;
@@ -65,9 +61,7 @@ public class DetailActivity extends AppCompatActivity {
         final List<User> mUsers = new ArrayList<>();
 
         // Retrieving the current date
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String mDate = format.format(date);
+        String mDate = Toolbox.getCurrentDate();
 
         // Retrieving the place id
         id = intent.getStringExtra("place_id");

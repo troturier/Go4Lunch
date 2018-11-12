@@ -27,7 +27,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -39,11 +38,7 @@ import com.openclassrooms.go4lunch.models.Restaurant;
 import com.openclassrooms.go4lunch.utils.GetNearbyPlacesData;
 import com.openclassrooms.go4lunch.utils.Toolbox;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import pub.devrel.easypermissions.EasyPermissions;
@@ -125,7 +120,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                     .setResultCallback(places -> {
                         if (places.getStatus().isSuccess() && places.getCount() > 0) {
                             selected_place = places.get(0);
-                            Log.i("PlacesTest", "Place found: " + selected_place.getName());
+                            Log.i("Places", "Place found: " + selected_place.getName());
                             Intent intent = new Intent(getActivity(), DetailActivity.class);
                             Bundle bundle = new Bundle();
                             if (selected_place.getId() != null ) bundle.putString("place_id", selected_place.getId());
@@ -137,7 +132,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                             intent.putExtras(bundle);
                             startActivity(intent);
                         } else {
-                            Log.e("PlacesTest", "Place not found");
+                            Log.e("Places", "Place not found");
                         }
                         places.release();
                     });
